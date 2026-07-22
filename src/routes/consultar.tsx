@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useServerFn } from "@tanstack/react-start";
+import { lookupWarranty, type PublicWarranty } from "@/lib/warranty-lookup.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,19 +21,10 @@ export const Route = createFileRoute("/consultar")({
   component: Consultar,
 });
 
-type Row = {
-  id: string;
-  product_name: string;
-  serial_number: string | null;
-  sale_date: string;
-  expires_at: string;
-  status: string;
-  duration_months: number;
-  customers?: { full_name: string } | null;
-  sales?: { sale_number: string } | null;
-};
+type Row = PublicWarranty;
 
 function Consultar() {
+  const runLookup = useServerFn(lookupWarranty);
   const [q, setQ] = useState("");
   const [rows, setRows] = useState<Row[] | null>(null);
   const [busy, setBusy] = useState(false);
@@ -43,25 +35,15 @@ function Consultar() {
     setBusy(true); setErr(null); setRows(null);
     const term = q.trim();
     if (!term) { setBusy(false); return; }
-    // Search by serial or by sale number
-    const { data: bySerial } = await supabase
-      .from("warranties")
-      .select("id, product_name, serial_number, sale_date, expires_at, status, duration_months, customers(full_name), sales(sale_number)")
-      .ilike("serial_number", `%${term}%`);
-    let data = bySerial ?? [];
-    if (data.length === 0) {
-      const { data: sale } = await supabase.from("sales").select("id").eq("sale_number", term.toUpperCase()).maybeSingle();
-      if (sale) {
-        const { data: w } = await supabase
-          .from("warranties")
-          .select("id, product_name, serial_number, sale_date, expires_at, status, duration_months, customers(full_name), sales(sale_number)")
-          .eq("sale_id", sale.id);
-        data = w ?? [];
-      }
+    try {
+      const data = await runLookup({ data: { term } });
+      setBusy(false);
+      if (data.length === 0) setErr("No encontramos garantías para tu búsqueda.");
+      setRows(data);
+    } catch {
+      setBusy(false);
+      setErr("No pudimos completar la búsqueda. Intenta nuevamente.");
     }
-    setBusy(false);
-    if (data.length === 0) setErr("No encontramos garantías para tu búsqueda.");
-    setRows(data as Row[]);
   };
 
   return (
@@ -96,12 +78,11 @@ function Consultar() {
                 <CardHeader className="flex flex-row items-start justify-between gap-3 space-y-0">
                   <div className="min-w-0">
                     <CardTitle className="truncate">{r.product_name}</CardTitle>
-                    <p className="text-xs text-muted-foreground">Serie: {r.serial_number ?? "—"} · Boleta {r.sales?.sale_number ?? "—"}</p>
+                    <p className="text-xs text-muted-foreground">Serie: {r.serial_number ?? "—"} · Boleta {r.sale_number ?? "—"}</p>
                   </div>
                   <Badge variant={color as "default" | "secondary" | "destructive"}><Icon className="mr-1 h-3.5 w-3.5" />{status}</Badge>
                 </CardHeader>
-                <CardContent className="grid grid-cols-2 gap-4 text-sm sm:grid-cols-4">
-                  <div><p className="text-xs text-muted-foreground">Cliente</p><p className="font-medium">{r.customers?.full_name ?? "—"}</p></div>
+                <CardContent className="grid grid-cols-2 gap-4 text-sm sm:grid-cols-3">
                   <div><p className="text-xs text-muted-foreground">Compra</p><p className="font-medium">{formatDate(r.sale_date)}</p></div>
                   <div><p className="text-xs text-muted-foreground">Vence</p><p className="font-medium">{formatDate(r.expires_at)}</p></div>
                   <div><p className="text-xs text-muted-foreground">Días restantes</p><p className={`font-bold ${days < 0 ? "text-destructive" : days <= 30 ? "text-orange-500" : "text-green-500"}`}>{days < 0 ? `Vencida hace ${Math.abs(days)}d` : `${days} días`}</p></div>
