@@ -46,7 +46,7 @@ function Products() {
   const save = async () => {
     const payload = { ...editing, purchase_price: Number(editing.purchase_price) || 0, sale_price: Number(editing.sale_price) || 0, stock: Number(editing.stock) || 0, default_warranty_months: Number(editing.default_warranty_months) || 12 };
     const { error } = editing.id
-      ? await supabase.from("products").update(payload).eq("id", editing.id)
+      ? await supabase.from("products").update(payload as never).eq("id", editing.id)
       : await supabase.from("products").insert(payload as never);
     if (error) return toast.error(error.message);
     toast.success("Guardado"); setOpen(false); setEditing(empty); load();
