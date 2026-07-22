@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /products
+Disallow: /customers
+Disallow: /sales
+Disallow: /warranties
+Disallow: /reports
