@@ -23,6 +23,7 @@ import { Route as AuthenticatedAdminRouteRouteImport } from './routes/_authentic
 import { Route as AuthenticatedSalesIndexRouteImport } from './routes/_authenticated/sales.index'
 import { Route as AuthenticatedSalesNewRouteImport } from './routes/_authenticated/sales.new'
 import { Route as AuthenticatedSalesIdRouteImport } from './routes/_authenticated/sales.$id'
+import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin/users'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
@@ -93,18 +94,24 @@ const AuthenticatedSalesIdRoute = AuthenticatedSalesIdRouteImport.update({
   path: '/sales/$id',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAdminUsersRoute = AuthenticatedAdminUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AuthenticatedAdminRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/consultar': typeof ConsultarRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/admin': typeof AuthenticatedAdminRouteRoute
+  '/admin': typeof AuthenticatedAdminRouteRouteWithChildren
   '/customers': typeof AuthenticatedCustomersRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/products': typeof AuthenticatedProductsRoute
   '/reports': typeof AuthenticatedReportsRoute
   '/warranties': typeof AuthenticatedWarrantiesRoute
+  '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/sales/$id': typeof AuthenticatedSalesIdRoute
   '/sales/new': typeof AuthenticatedSalesNewRoute
   '/sales/': typeof AuthenticatedSalesIndexRoute
@@ -114,12 +121,13 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/consultar': typeof ConsultarRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/admin': typeof AuthenticatedAdminRouteRoute
+  '/admin': typeof AuthenticatedAdminRouteRouteWithChildren
   '/customers': typeof AuthenticatedCustomersRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/products': typeof AuthenticatedProductsRoute
   '/reports': typeof AuthenticatedReportsRoute
   '/warranties': typeof AuthenticatedWarrantiesRoute
+  '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/sales/$id': typeof AuthenticatedSalesIdRoute
   '/sales/new': typeof AuthenticatedSalesNewRoute
   '/sales': typeof AuthenticatedSalesIndexRoute
@@ -131,12 +139,13 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/consultar': typeof ConsultarRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/_authenticated/admin': typeof AuthenticatedAdminRouteRoute
+  '/_authenticated/admin': typeof AuthenticatedAdminRouteRouteWithChildren
   '/_authenticated/customers': typeof AuthenticatedCustomersRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/products': typeof AuthenticatedProductsRoute
   '/_authenticated/reports': typeof AuthenticatedReportsRoute
   '/_authenticated/warranties': typeof AuthenticatedWarrantiesRoute
+  '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
   '/_authenticated/sales/$id': typeof AuthenticatedSalesIdRoute
   '/_authenticated/sales/new': typeof AuthenticatedSalesNewRoute
   '/_authenticated/sales/': typeof AuthenticatedSalesIndexRoute
@@ -154,6 +163,7 @@ export interface FileRouteTypes {
     | '/products'
     | '/reports'
     | '/warranties'
+    | '/admin/users'
     | '/sales/$id'
     | '/sales/new'
     | '/sales/'
@@ -169,6 +179,7 @@ export interface FileRouteTypes {
     | '/products'
     | '/reports'
     | '/warranties'
+    | '/admin/users'
     | '/sales/$id'
     | '/sales/new'
     | '/sales'
@@ -185,6 +196,7 @@ export interface FileRouteTypes {
     | '/_authenticated/products'
     | '/_authenticated/reports'
     | '/_authenticated/warranties'
+    | '/_authenticated/admin/users'
     | '/_authenticated/sales/$id'
     | '/_authenticated/sales/new'
     | '/_authenticated/sales/'
@@ -298,11 +310,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSalesIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/users': {
+      id: '/_authenticated/admin/users'
+      path: '/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AuthenticatedAdminUsersRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
   }
 }
 
+interface AuthenticatedAdminRouteRouteChildren {
+  AuthenticatedAdminUsersRoute: typeof AuthenticatedAdminUsersRoute
+}
+
+const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren =
+  {
+    AuthenticatedAdminUsersRoute: AuthenticatedAdminUsersRoute,
+  }
+
+const AuthenticatedAdminRouteRouteWithChildren =
+  AuthenticatedAdminRouteRoute._addFileChildren(
+    AuthenticatedAdminRouteRouteChildren,
+  )
+
 interface AuthenticatedRouteRouteChildren {
-  AuthenticatedAdminRouteRoute: typeof AuthenticatedAdminRouteRoute
+  AuthenticatedAdminRouteRoute: typeof AuthenticatedAdminRouteRouteWithChildren
   AuthenticatedCustomersRoute: typeof AuthenticatedCustomersRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedProductsRoute: typeof AuthenticatedProductsRoute
@@ -314,7 +347,7 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
-  AuthenticatedAdminRouteRoute: AuthenticatedAdminRouteRoute,
+  AuthenticatedAdminRouteRoute: AuthenticatedAdminRouteRouteWithChildren,
   AuthenticatedCustomersRoute: AuthenticatedCustomersRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedProductsRoute: AuthenticatedProductsRoute,
