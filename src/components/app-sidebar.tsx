@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { LayoutDashboard, Package, Users, ShoppingCart, ShieldCheck, BarChart3, Search, LogOut, Monitor } from "lucide-react";
+import { LayoutDashboard, Package, Users, ShoppingCart, ShieldCheck, BarChart3, Search, LogOut, Monitor, UserCog, ScrollText } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -16,21 +16,26 @@ import {
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "./ui/button";
 
-const items = [
+type NavItem = { title: string; url: string; icon: typeof LayoutDashboard; adminOnly?: boolean };
+
+const items: NavItem[] = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Nueva venta", url: "/sales/new", icon: ShoppingCart },
   { title: "Ventas", url: "/sales", icon: ShoppingCart },
   { title: "Productos", url: "/products", icon: Package },
   { title: "Clientes", url: "/customers", icon: Users },
   { title: "Garantías", url: "/warranties", icon: ShieldCheck },
-  { title: "Reportes", url: "/reports", icon: BarChart3 },
+  { title: "Reportes", url: "/reports", icon: BarChart3, adminOnly: true },
+  { title: "Usuarios", url: "/admin/users", icon: UserCog, adminOnly: true },
+  { title: "Auditoría", url: "/admin/audit", icon: ScrollText, adminOnly: true },
 ];
 
 export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const pathname = useRouterState({ select: (r) => r.location.pathname });
-  const { user, role, signOut } = useAuth();
+  const { user, role, isAdmin, signOut } = useAuth();
+  const visible = items.filter((i) => !i.adminOnly || isAdmin);
 
   return (
     <Sidebar collapsible="icon">
@@ -47,7 +52,7 @@ export function AppSidebar() {
           <SidebarGroupLabel>Menú</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {items.map((item) => {
+              {visible.map((item) => {
                 const active = pathname === item.url || (item.url !== "/dashboard" && pathname.startsWith(item.url));
                 return (
                   <SidebarMenuItem key={item.url}>
