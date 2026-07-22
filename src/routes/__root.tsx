@@ -11,6 +11,8 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { AuthProvider } from "@/hooks/use-auth";
+import { Toaster } from "@/components/ui/sonner";
 
 function NotFoundComponent() {
   return (
@@ -77,14 +79,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { title: "CompuERP — Ventas, Garantías y Productos" },
+      { name: "description", content: "Sistema ERP para venta y reparación de computadoras. Registra ventas, controla garantías y stock en segundos." },
+      { name: "author", content: "CompuERP" },
+      { property: "og:title", content: "CompuERP — Ventas y Garantías" },
+      { property: "og:description", content: "ERP moderno para negocios de venta y reparación de computadoras." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:site", content: "@Lovable" },
     ],
     links: [
       {
@@ -119,8 +120,10 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
+      <AuthProvider>
+        <Outlet />
+        <Toaster richColors position="top-right" />
+      </AuthProvider>
     </QueryClientProvider>
   );
 }

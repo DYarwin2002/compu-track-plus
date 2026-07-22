@@ -9,38 +9,213 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as ConsultarRouteImport } from './routes/consultar'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedWarrantiesRouteImport } from './routes/_authenticated/warranties'
+import { Route as AuthenticatedReportsRouteImport } from './routes/_authenticated/reports'
+import { Route as AuthenticatedProductsRouteImport } from './routes/_authenticated/products'
+import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedCustomersRouteImport } from './routes/_authenticated/customers'
+import { Route as AuthenticatedSalesIndexRouteImport } from './routes/_authenticated/sales.index'
+import { Route as AuthenticatedSalesNewRouteImport } from './routes/_authenticated/sales.new'
+import { Route as AuthenticatedSalesIdRouteImport } from './routes/_authenticated/sales.$id'
 
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConsultarRoute = ConsultarRouteImport.update({
+  id: '/consultar',
+  path: '/consultar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedWarrantiesRoute = AuthenticatedWarrantiesRouteImport.update({
+  id: '/warranties',
+  path: '/warranties',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedReportsRoute = AuthenticatedReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedProductsRoute = AuthenticatedProductsRouteImport.update({
+  id: '/products',
+  path: '/products',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedCustomersRoute = AuthenticatedCustomersRouteImport.update({
+  id: '/customers',
+  path: '/customers',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedSalesIndexRoute = AuthenticatedSalesIndexRouteImport.update({
+  id: '/sales/',
+  path: '/sales/',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedSalesNewRoute = AuthenticatedSalesNewRouteImport.update({
+  id: '/sales/new',
+  path: '/sales/new',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedSalesIdRoute = AuthenticatedSalesIdRouteImport.update({
+  id: '/sales/$id',
+  path: '/sales/$id',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/consultar': typeof ConsultarRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/customers': typeof AuthenticatedCustomersRoute
+  '/dashboard': typeof AuthenticatedDashboardRoute
+  '/products': typeof AuthenticatedProductsRoute
+  '/reports': typeof AuthenticatedReportsRoute
+  '/warranties': typeof AuthenticatedWarrantiesRoute
+  '/sales/$id': typeof AuthenticatedSalesIdRoute
+  '/sales/new': typeof AuthenticatedSalesNewRoute
+  '/sales/': typeof AuthenticatedSalesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/consultar': typeof ConsultarRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/customers': typeof AuthenticatedCustomersRoute
+  '/dashboard': typeof AuthenticatedDashboardRoute
+  '/products': typeof AuthenticatedProductsRoute
+  '/reports': typeof AuthenticatedReportsRoute
+  '/warranties': typeof AuthenticatedWarrantiesRoute
+  '/sales/$id': typeof AuthenticatedSalesIdRoute
+  '/sales/new': typeof AuthenticatedSalesNewRoute
+  '/sales': typeof AuthenticatedSalesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/auth': typeof AuthRoute
+  '/consultar': typeof ConsultarRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/_authenticated/customers': typeof AuthenticatedCustomersRoute
+  '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/products': typeof AuthenticatedProductsRoute
+  '/_authenticated/reports': typeof AuthenticatedReportsRoute
+  '/_authenticated/warranties': typeof AuthenticatedWarrantiesRoute
+  '/_authenticated/sales/$id': typeof AuthenticatedSalesIdRoute
+  '/_authenticated/sales/new': typeof AuthenticatedSalesNewRoute
+  '/_authenticated/sales/': typeof AuthenticatedSalesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/consultar'
+    | '/sitemap.xml'
+    | '/customers'
+    | '/dashboard'
+    | '/products'
+    | '/reports'
+    | '/warranties'
+    | '/sales/$id'
+    | '/sales/new'
+    | '/sales/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/auth'
+    | '/consultar'
+    | '/sitemap.xml'
+    | '/customers'
+    | '/dashboard'
+    | '/products'
+    | '/reports'
+    | '/warranties'
+    | '/sales/$id'
+    | '/sales/new'
+    | '/sales'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/auth'
+    | '/consultar'
+    | '/sitemap.xml'
+    | '/_authenticated/customers'
+    | '/_authenticated/dashboard'
+    | '/_authenticated/products'
+    | '/_authenticated/reports'
+    | '/_authenticated/warranties'
+    | '/_authenticated/sales/$id'
+    | '/_authenticated/sales/new'
+    | '/_authenticated/sales/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AuthRoute: typeof AuthRoute
+  ConsultarRoute: typeof ConsultarRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/consultar': {
+      id: '/consultar'
+      path: '/consultar'
+      fullPath: '/consultar'
+      preLoaderRoute: typeof ConsultarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,22 +223,97 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/warranties': {
+      id: '/_authenticated/warranties'
+      path: '/warranties'
+      fullPath: '/warranties'
+      preLoaderRoute: typeof AuthenticatedWarrantiesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/reports': {
+      id: '/_authenticated/reports'
+      path: '/reports'
+      fullPath: '/reports'
+      preLoaderRoute: typeof AuthenticatedReportsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/products': {
+      id: '/_authenticated/products'
+      path: '/products'
+      fullPath: '/products'
+      preLoaderRoute: typeof AuthenticatedProductsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard': {
+      id: '/_authenticated/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/customers': {
+      id: '/_authenticated/customers'
+      path: '/customers'
+      fullPath: '/customers'
+      preLoaderRoute: typeof AuthenticatedCustomersRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/sales/': {
+      id: '/_authenticated/sales/'
+      path: '/sales'
+      fullPath: '/sales/'
+      preLoaderRoute: typeof AuthenticatedSalesIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/sales/new': {
+      id: '/_authenticated/sales/new'
+      path: '/sales/new'
+      fullPath: '/sales/new'
+      preLoaderRoute: typeof AuthenticatedSalesNewRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/sales/$id': {
+      id: '/_authenticated/sales/$id'
+      path: '/sales/$id'
+      fullPath: '/sales/$id'
+      preLoaderRoute: typeof AuthenticatedSalesIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedCustomersRoute: typeof AuthenticatedCustomersRoute
+  AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedProductsRoute: typeof AuthenticatedProductsRoute
+  AuthenticatedReportsRoute: typeof AuthenticatedReportsRoute
+  AuthenticatedWarrantiesRoute: typeof AuthenticatedWarrantiesRoute
+  AuthenticatedSalesIdRoute: typeof AuthenticatedSalesIdRoute
+  AuthenticatedSalesNewRoute: typeof AuthenticatedSalesNewRoute
+  AuthenticatedSalesIndexRoute: typeof AuthenticatedSalesIndexRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedCustomersRoute: AuthenticatedCustomersRoute,
+  AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedProductsRoute: AuthenticatedProductsRoute,
+  AuthenticatedReportsRoute: AuthenticatedReportsRoute,
+  AuthenticatedWarrantiesRoute: AuthenticatedWarrantiesRoute,
+  AuthenticatedSalesIdRoute: AuthenticatedSalesIdRoute,
+  AuthenticatedSalesNewRoute: AuthenticatedSalesNewRoute,
+  AuthenticatedSalesIndexRoute: AuthenticatedSalesIndexRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AuthRoute: AuthRoute,
+  ConsultarRoute: ConsultarRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
