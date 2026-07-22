@@ -9,7 +9,12 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
  * proof of authorization.
  */
 async function assertAdmin(context: {
-  supabase: { rpc: (fn: string, args: Record<string, unknown>) => Promise<{ data: unknown }> };
+  supabase: {
+    rpc: (
+      fn: "has_role",
+      args: { _user_id: string; _role: "admin" | "vendedor" },
+    ) => Promise<{ data: boolean | null }>;
+  };
   userId: string;
 }) {
   const { data } = await context.supabase.rpc("has_role", {
