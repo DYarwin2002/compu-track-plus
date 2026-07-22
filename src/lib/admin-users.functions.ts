@@ -8,15 +8,8 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
  * loading the service-role client — never trust `supabaseAdmin` as
  * proof of authorization.
  */
-async function assertAdmin(context: {
-  supabase: {
-    rpc: (
-      fn: "has_role",
-      args: { _user_id: string; _role: "admin" | "vendedor" },
-    ) => Promise<{ data: boolean | null }>;
-  };
-  userId: string;
-}) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function assertAdmin(context: any) {
   const { data } = await context.supabase.rpc("has_role", {
     _user_id: context.userId,
     _role: "admin",
