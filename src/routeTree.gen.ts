@@ -24,6 +24,7 @@ import { Route as AuthenticatedSalesIndexRouteImport } from './routes/_authentic
 import { Route as AuthenticatedSalesNewRouteImport } from './routes/_authenticated/sales.new'
 import { Route as AuthenticatedSalesIdRouteImport } from './routes/_authenticated/sales.$id'
 import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin/users'
+import { Route as AuthenticatedAdminAuditRouteImport } from './routes/_authenticated/admin/audit'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
@@ -99,6 +100,11 @@ const AuthenticatedAdminUsersRoute = AuthenticatedAdminUsersRouteImport.update({
   path: '/users',
   getParentRoute: () => AuthenticatedAdminRouteRoute,
 } as any)
+const AuthenticatedAdminAuditRoute = AuthenticatedAdminAuditRouteImport.update({
+  id: '/audit',
+  path: '/audit',
+  getParentRoute: () => AuthenticatedAdminRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -111,6 +117,7 @@ export interface FileRoutesByFullPath {
   '/products': typeof AuthenticatedProductsRoute
   '/reports': typeof AuthenticatedReportsRoute
   '/warranties': typeof AuthenticatedWarrantiesRoute
+  '/admin/audit': typeof AuthenticatedAdminAuditRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/sales/$id': typeof AuthenticatedSalesIdRoute
   '/sales/new': typeof AuthenticatedSalesNewRoute
@@ -127,6 +134,7 @@ export interface FileRoutesByTo {
   '/products': typeof AuthenticatedProductsRoute
   '/reports': typeof AuthenticatedReportsRoute
   '/warranties': typeof AuthenticatedWarrantiesRoute
+  '/admin/audit': typeof AuthenticatedAdminAuditRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/sales/$id': typeof AuthenticatedSalesIdRoute
   '/sales/new': typeof AuthenticatedSalesNewRoute
@@ -145,6 +153,7 @@ export interface FileRoutesById {
   '/_authenticated/products': typeof AuthenticatedProductsRoute
   '/_authenticated/reports': typeof AuthenticatedReportsRoute
   '/_authenticated/warranties': typeof AuthenticatedWarrantiesRoute
+  '/_authenticated/admin/audit': typeof AuthenticatedAdminAuditRoute
   '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
   '/_authenticated/sales/$id': typeof AuthenticatedSalesIdRoute
   '/_authenticated/sales/new': typeof AuthenticatedSalesNewRoute
@@ -163,6 +172,7 @@ export interface FileRouteTypes {
     | '/products'
     | '/reports'
     | '/warranties'
+    | '/admin/audit'
     | '/admin/users'
     | '/sales/$id'
     | '/sales/new'
@@ -179,6 +189,7 @@ export interface FileRouteTypes {
     | '/products'
     | '/reports'
     | '/warranties'
+    | '/admin/audit'
     | '/admin/users'
     | '/sales/$id'
     | '/sales/new'
@@ -196,6 +207,7 @@ export interface FileRouteTypes {
     | '/_authenticated/products'
     | '/_authenticated/reports'
     | '/_authenticated/warranties'
+    | '/_authenticated/admin/audit'
     | '/_authenticated/admin/users'
     | '/_authenticated/sales/$id'
     | '/_authenticated/sales/new'
@@ -317,15 +329,24 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminUsersRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
+    '/_authenticated/admin/audit': {
+      id: '/_authenticated/admin/audit'
+      path: '/audit'
+      fullPath: '/admin/audit'
+      preLoaderRoute: typeof AuthenticatedAdminAuditRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
   }
 }
 
 interface AuthenticatedAdminRouteRouteChildren {
+  AuthenticatedAdminAuditRoute: typeof AuthenticatedAdminAuditRoute
   AuthenticatedAdminUsersRoute: typeof AuthenticatedAdminUsersRoute
 }
 
 const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren =
   {
+    AuthenticatedAdminAuditRoute: AuthenticatedAdminAuditRoute,
     AuthenticatedAdminUsersRoute: AuthenticatedAdminUsersRoute,
   }
 

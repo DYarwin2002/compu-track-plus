@@ -8,6 +8,8 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Monitor } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
+import { logAudit } from "@/lib/audit.functions";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -24,6 +26,7 @@ export const Route = createFileRoute("/auth")({
 function AuthPage() {
   const { session, loading } = useAuth();
   const nav = useNavigate();
+  const runAudit = useServerFn(logAudit);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
@@ -36,7 +39,11 @@ function AuthPage() {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setBusy(false);
     if (error) toast.error(error.message);
-    else { toast.success("Bienvenido"); nav({ to: "/dashboard" }); }
+    else {
+      toast.success("Bienvenido");
+      runAudit({ data: { action: "auth.sign_in", entity: "session" } }).catch(() => {});
+      nav({ to: "/dashboard" });
+    }
   };
 
   return (
