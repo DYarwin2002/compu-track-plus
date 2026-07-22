@@ -14,10 +14,47 @@ export type Database = {
   }
   public: {
     Tables: {
+      audit_log: {
+        Row: {
+          action: string
+          created_at: string
+          entity: string | null
+          entity_id: string | null
+          id: string
+          ip: string | null
+          meta: Json | null
+          user_email: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          entity?: string | null
+          entity_id?: string | null
+          id?: string
+          ip?: string | null
+          meta?: Json | null
+          user_email?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          entity?: string | null
+          entity_id?: string | null
+          id?: string
+          ip?: string | null
+          meta?: Json | null
+          user_email?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       customers: {
         Row: {
           address: string | null
           created_at: string
+          created_by: string | null
           document: string
           email: string | null
           full_name: string
@@ -28,6 +65,7 @@ export type Database = {
         Insert: {
           address?: string | null
           created_at?: string
+          created_by?: string | null
           document: string
           email?: string | null
           full_name: string
@@ -38,6 +76,7 @@ export type Database = {
         Update: {
           address?: string | null
           created_at?: string
+          created_by?: string | null
           document?: string
           email?: string | null
           full_name?: string
@@ -100,18 +139,21 @@ export type Database = {
       }
       profiles: {
         Row: {
+          active: boolean
           created_at: string
           email: string | null
           full_name: string | null
           id: string
         }
         Insert: {
+          active?: boolean
           created_at?: string
           email?: string | null
           full_name?: string | null
           id: string
         }
         Update: {
+          active?: boolean
           created_at?: string
           email?: string | null
           full_name?: string | null
@@ -247,6 +289,7 @@ export type Database = {
       warranties: {
         Row: {
           created_at: string
+          created_by: string | null
           customer_id: string | null
           duration_months: number
           expires_at: string
@@ -262,6 +305,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          created_by?: string | null
           customer_id?: string | null
           duration_months: number
           expires_at: string
@@ -277,6 +321,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          created_by?: string | null
           customer_id?: string | null
           duration_months?: number
           expires_at?: string
