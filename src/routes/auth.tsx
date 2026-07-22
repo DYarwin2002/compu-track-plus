@@ -6,9 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { Monitor } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
+import { logAudit } from "@/lib/audit.functions";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -25,9 +26,9 @@ export const Route = createFileRoute("/auth")({
 function AuthPage() {
   const { session, loading } = useAuth();
   const nav = useNavigate();
+  const runAudit = useServerFn(logAudit);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [fullName, setFullName] = useState("");
   const [busy, setBusy] = useState(false);
 
   useEffect(() => { if (!loading && session) nav({ to: "/dashboard" }); }, [session, loading, nav]);
@@ -38,19 +39,11 @@ function AuthPage() {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setBusy(false);
     if (error) toast.error(error.message);
-    else { toast.success("Bienvenido"); nav({ to: "/dashboard" }); }
-  };
-
-  const doSignUp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setBusy(true);
-    const { error } = await supabase.auth.signUp({
-      email, password,
-      options: { emailRedirectTo: `${window.location.origin}/dashboard`, data: { full_name: fullName } },
-    });
-    setBusy(false);
-    if (error) toast.error(error.message);
-    else { toast.success("Cuenta creada. Revisa tu correo si es necesario."); }
+    else {
+      toast.success("Bienvenido");
+      runAudit({ data: { action: "auth.sign_in", entity: "session" } }).catch(() => {});
+      nav({ to: "/dashboard" });
+    }
   };
 
   return (
@@ -64,32 +57,22 @@ function AuthPage() {
         </Link>
         <Card>
           <CardHeader>
-            <CardTitle>Accede al sistema</CardTitle>
-            <CardDescription>Panel para administradores y vendedores.</CardDescription>
+            <CardTitle>Ingresar al sistema</CardTitle>
+            <CardDescription>
+              Acceso exclusivo para administradores y vendedores autorizados.
+              Los clientes usan la <Link to="/consultar" className="underline">consulta pública de garantía</Link>.
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <Tabs defaultValue="in">
-              <TabsList className="grid grid-cols-2">
-                <TabsTrigger value="in">Iniciar sesión</TabsTrigger>
-                <TabsTrigger value="up">Crear cuenta</TabsTrigger>
-              </TabsList>
-              <TabsContent value="in">
-                <form onSubmit={doSignIn} className="space-y-3">
-                  <div><Label>Correo</Label><Input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} /></div>
-                  <div><Label>Contraseña</Label><Input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} /></div>
-                  <Button type="submit" className="w-full" disabled={busy}>{busy ? "Ingresando…" : "Entrar"}</Button>
-                </form>
-              </TabsContent>
-              <TabsContent value="up">
-                <form onSubmit={doSignUp} className="space-y-3">
-                  <div><Label>Nombre completo</Label><Input required value={fullName} onChange={(e) => setFullName(e.target.value)} /></div>
-                  <div><Label>Correo</Label><Input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} /></div>
-                  <div><Label>Contraseña</Label><Input type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} /></div>
-                  <Button type="submit" className="w-full" disabled={busy}>{busy ? "Creando…" : "Crear cuenta"}</Button>
-                  <p className="text-xs text-muted-foreground">El primer usuario se registra como Administrador. Los siguientes son Vendedores.</p>
-                </form>
-              </TabsContent>
-            </Tabs>
+            <form onSubmit={doSignIn} className="space-y-3">
+              <div><Label>Correo</Label><Input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} /></div>
+              <div><Label>Contraseña</Label><Input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} /></div>
+              <Button type="submit" className="w-full" disabled={busy}>{busy ? "Ingresando…" : "Entrar"}</Button>
+              <p className="pt-2 text-xs text-muted-foreground">
+                ¿Necesitas una cuenta? Solicítala al administrador del sistema. El registro público
+                está deshabilitado por seguridad.
+              </p>
+            </form>
           </CardContent>
         </Card>
       </div>
