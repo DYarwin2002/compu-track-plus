@@ -3,11 +3,12 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Printer, ArrowLeft } from "lucide-react";
+import { Printer, ArrowLeft, Download } from "lucide-react";
 import { formatSoles, formatDateTime } from "@/lib/format";
+import { downloadBoletaPDF } from "@/lib/boleta-pdf";
 
 export const Route = createFileRoute("/_authenticated/sales/$id")({
-  head: () => ({ meta: [{ title: "Boleta — CompuERP" }, { name: "description", content: "Detalle e impresión de boleta." }] }),
+  head: () => ({ meta: [{ title: "Boleta — ServiCompu Yarango" }, { name: "description", content: "Detalle e impresión de boleta." }] }),
   component: SaleDetail,
 });
 
@@ -40,6 +41,27 @@ function SaleDetail() {
             <button onClick={() => setFormat("a4")} className={`px-3 py-1.5 text-xs ${format === "a4" ? "bg-primary text-primary-foreground" : ""}`}>A4</button>
             <button onClick={() => setFormat("thermal")} className={`px-3 py-1.5 text-xs ${format === "thermal" ? "bg-primary text-primary-foreground" : ""}`}>Térmico 80mm</button>
           </div>
+          <Button variant="outline" onClick={() => {
+            if (!sale) return;
+            downloadBoletaPDF({
+              sale_number: sale.sale_number,
+              sale_date: sale.sale_date,
+              subtotal: Number(sale.subtotal),
+              discount: Number(sale.discount),
+              igv: Number(sale.igv),
+              total: Number(sale.total),
+              payment_method: sale.payment_method,
+              customer: sale.customers,
+              items: sale.sale_items.map((i) => ({
+                product_name: i.product_name,
+                serial_number: i.serial_number,
+                quantity: Number(i.quantity),
+                unit_price: Number(i.unit_price),
+                line_total: Number(i.line_total),
+                warranty_months: Number(i.warranty_months),
+              })),
+            });
+          }}><Download className="mr-2 h-4 w-4" /> PDF</Button>
           <Button onClick={() => window.print()}><Printer className="mr-2 h-4 w-4" /> Imprimir</Button>
         </div>
       </div>
@@ -54,7 +76,7 @@ function BoletaA4({ sale }: { sale: SaleFull }) {
     <Card className="mx-auto max-w-3xl p-8 print:border-0 print:shadow-none">
       <div className="flex items-start justify-between border-b border-border pb-4">
         <div>
-          <h2 className="text-2xl font-black">CompuERP</h2>
+          <h2 className="text-2xl font-black">ServiCompu Yarango</h2>
           <p className="text-xs text-muted-foreground">Venta y reparación de computadoras</p>
         </div>
         <div className="text-right">
@@ -106,7 +128,7 @@ function BoletaThermal({ sale }: { sale: SaleFull }) {
   return (
     <div className="mx-auto bg-white p-3 text-black" style={{ width: "80mm", fontFamily: "monospace", fontSize: "11px" }}>
       <div className="text-center">
-        <p className="text-base font-bold">CompuERP</p>
+        <p className="text-base font-bold">ServiCompu Yarango</p>
         <p>Venta y reparación</p>
         <p>================================</p>
         <p className="font-bold">BOLETA {sale.sale_number}</p>
