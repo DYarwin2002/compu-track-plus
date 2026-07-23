@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { LayoutDashboard, Package, Users, ShoppingCart, ShieldCheck, BarChart3, Search, LogOut, Monitor, UserCog, ScrollText } from "lucide-react";
+import { LayoutDashboard, Package, Users, ShoppingCart, ShieldCheck, BarChart3, Search, LogOut, Monitor, UserCog, ScrollText, Wrench } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -25,6 +25,7 @@ const items: NavItem[] = [
   { title: "Productos", url: "/products", icon: Package },
   { title: "Clientes", url: "/customers", icon: Users },
   { title: "Garantías", url: "/warranties", icon: ShieldCheck },
+  { title: "Servicio técnico", url: "/repairs", icon: Wrench },
   { title: "Reportes", url: "/reports", icon: BarChart3, adminOnly: true },
   { title: "Usuarios", url: "/admin/users", icon: UserCog, adminOnly: true },
   { title: "Auditoría", url: "/admin/audit", icon: ScrollText, adminOnly: true },
