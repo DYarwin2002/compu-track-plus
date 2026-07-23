@@ -78,7 +78,7 @@ function Dashboard() {
         supabase.from("warranties").select("status"),
         supabase.from("repairs").select("status"),
         supabase.from("products").select("stock"),
-        supabase.from("products").select("id, name, stock, min_stock"),
+        supabase.from("products").select("id, stock"),
         supabase.from("sales").select("id, sale_number, sale_date, total")
           .order("sale_date", { ascending: false }).limit(6),
         supabase.from("repairs").select("id, order_number, device, status, created_at")
@@ -89,7 +89,7 @@ function Dashboard() {
       const monthSales = (monthQ.data ?? []).reduce((s, r) => s + Number(r.total || 0), 0);
       const prevMonthSales = (prevQ.data ?? []).reduce((s, r) => s + Number(r.total || 0), 0);
       const stockUnits = (stockQ.data ?? []).reduce((s, p) => s + (p.stock || 0), 0);
-      const lowStock = (lowStockQ.data ?? []).filter((p) => (p.stock ?? 0) <= (p.min_stock ?? 0)).length;
+      const lowStock = (lowStockQ.data ?? []).filter((p) => (p.stock ?? 0) <= 3).length;
       const warrCount = (warrCountsQ.data ?? []).reduce<Record<string, number>>((acc, r) => {
         acc[r.status] = (acc[r.status] ?? 0) + 1; return acc;
       }, {});
