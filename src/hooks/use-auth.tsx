@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from "
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import type { Permission } from "@/lib/permissions";
 
 type Role = "admin" | "vendedor" | null;
 
@@ -11,6 +12,8 @@ interface AuthCtx {
   role: Role;
   loading: boolean;
   isAdmin: boolean;
+  permissions: Set<Permission>;
+  can: (perm: Permission) => boolean;
   signOut: () => Promise<void>;
 }
 
@@ -20,6 +23,8 @@ const Ctx = createContext<AuthCtx>({
   role: null,
   loading: true,
   isAdmin: false,
+  permissions: new Set(),
+  can: () => false,
   signOut: async () => {},
 });
 
@@ -27,6 +32,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [role, setRole] = useState<Role>(null);
   const [loading, setLoading] = useState(true);
+  const [permissions, setPermissions] = useState<Set<Permission>>(new Set());
 
   const loadContextFor = async (userId: string) => {
     const [{ data: roleRow }, { data: profile }] = await Promise.all([
@@ -37,9 +43,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       toast.error("Tu cuenta ha sido desactivada. Contacta al administrador.");
       await supabase.auth.signOut();
       setRole(null);
+      setPermissions(new Set());
       return;
     }
-    setRole((roleRow?.role as Role) ?? "vendedor");
+    const r = (roleRow?.role as Role) ?? "vendedor";
+    setRole(r);
+    // Load permissions for this role. Admin implicitly has all.
+    const { data: perms } = await supabase
+      .from("role_permissions")
+      .select("permission")
+      .eq("role", r);
+    setPermissions(new Set((perms ?? []).map((p) => p.permission as Permission)));
   };
 
   useEffect(() => {
@@ -49,6 +63,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setTimeout(() => { loadContextFor(s.user.id); }, 0);
       } else {
         setRole(null);
+        setPermissions(new Set());
       }
     });
     supabase.auth.getSession().then(({ data: { session: s } }) => {
@@ -62,10 +77,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signOut = async () => {
     await supabase.auth.signOut();
     setRole(null);
+    setPermissions(new Set());
   };
 
+  const isAdmin = role === "admin";
+  const can = (perm: Permission) => isAdmin || permissions.has(perm);
+
   return (
-    <Ctx.Provider value={{ session, user: session?.user ?? null, role, loading, isAdmin: role === "admin", signOut }}>
+    <Ctx.Provider value={{ session, user: session?.user ?? null, role, loading, isAdmin, permissions, can, signOut }}>
       {children}
     </Ctx.Provider>
   );

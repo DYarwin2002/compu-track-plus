@@ -14,10 +14,10 @@ import { logAudit } from "@/lib/audit.functions";
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
-      { title: "Ingresar — CompuERP" },
-      { name: "description", content: "Accede al panel del ERP de tu tienda de computadoras." },
-      { property: "og:title", content: "Ingresar — CompuERP" },
-      { property: "og:description", content: "Accede al panel del ERP." },
+      { title: "Ingresar — ServiCompu Yarango" },
+      { name: "description", content: "Acceso al sistema interno de ServiCompu Yarango." },
+      { property: "og:title", content: "Ingresar — ServiCompu Yarango" },
+      { property: "og:description", content: "Acceso al sistema interno." },
     ],
   }),
   component: AuthPage,
@@ -53,14 +53,14 @@ function AuthPage() {
           <div className="grid h-10 w-10 place-items-center rounded-lg" style={{ background: "var(--gradient-primary)" }}>
             <Monitor className="h-5 w-5 text-primary-foreground" />
           </div>
-          <span className="text-xl font-bold">CompuERP</span>
+          <span className="text-xl font-bold">ServiCompu Yarango</span>
         </Link>
         <Card>
           <CardHeader>
             <CardTitle>Ingresar al sistema</CardTitle>
             <CardDescription>
               Acceso exclusivo para administradores y vendedores autorizados.
-              Los clientes usan la <Link to="/consultar" className="underline">consulta pública de garantía</Link>.
+              Los clientes usan el <Link to="/consultar" className="underline">portal público</Link>.
             </CardDescription>
           </CardHeader>
           <CardContent>

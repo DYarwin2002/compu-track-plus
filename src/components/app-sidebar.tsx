@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { LayoutDashboard, Package, Users, ShoppingCart, ShieldCheck, BarChart3, Search, LogOut, Monitor, UserCog, ScrollText, Wrench } from "lucide-react";
+import { LayoutDashboard, Package, Users, ShoppingCart, ShieldCheck, BarChart3, Search, LogOut, Cpu, UserCog, ScrollText, Wrench, Shield } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -16,18 +16,21 @@ import {
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "./ui/button";
 
-type NavItem = { title: string; url: string; icon: typeof LayoutDashboard; adminOnly?: boolean };
+import type { Permission } from "@/lib/permissions";
+
+type NavItem = { title: string; url: string; icon: typeof LayoutDashboard; adminOnly?: boolean; permission?: Permission };
 
 const items: NavItem[] = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
-  { title: "Nueva venta", url: "/sales/new", icon: ShoppingCart },
-  { title: "Ventas", url: "/sales", icon: ShoppingCart },
-  { title: "Productos", url: "/products", icon: Package },
-  { title: "Clientes", url: "/customers", icon: Users },
-  { title: "Garantías", url: "/warranties", icon: ShieldCheck },
-  { title: "Servicio técnico", url: "/repairs", icon: Wrench },
-  { title: "Reportes", url: "/reports", icon: BarChart3, adminOnly: true },
+  { title: "Nueva venta", url: "/sales/new", icon: ShoppingCart, permission: "sales.create" },
+  { title: "Ventas", url: "/sales", icon: ShoppingCart, permission: "sales.view" },
+  { title: "Productos", url: "/products", icon: Package, permission: "products.view" },
+  { title: "Clientes", url: "/customers", icon: Users, permission: "customers.view" },
+  { title: "Garantías", url: "/warranties", icon: ShieldCheck, permission: "warranties.view" },
+  { title: "Servicio técnico", url: "/repairs", icon: Wrench, permission: "repairs.view" },
+  { title: "Reportes", url: "/reports", icon: BarChart3, permission: "reports.view" },
   { title: "Usuarios", url: "/admin/users", icon: UserCog, adminOnly: true },
+  { title: "Roles y permisos", url: "/admin/roles", icon: Shield, adminOnly: true },
   { title: "Auditoría", url: "/admin/audit", icon: ScrollText, adminOnly: true },
 ];
 
@@ -35,17 +38,26 @@ export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const pathname = useRouterState({ select: (r) => r.location.pathname });
-  const { user, role, isAdmin, signOut } = useAuth();
-  const visible = items.filter((i) => !i.adminOnly || isAdmin);
+  const { user, role, isAdmin, can, signOut } = useAuth();
+  const visible = items.filter((i) => {
+    if (i.adminOnly) return isAdmin;
+    if (i.permission) return can(i.permission);
+    return true;
+  });
 
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
         <div className="flex items-center gap-2 px-2 py-2">
-          <div className="grid h-8 w-8 shrink-0 place-items-center rounded-lg" style={{ background: "var(--gradient-primary)" }}>
-            <Monitor className="h-4 w-4 text-primary-foreground" />
+          <div className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-primary-foreground" style={{ background: "var(--gradient-primary)" }}>
+            <Cpu className="h-4 w-4" />
           </div>
-          {!collapsed && <span className="font-bold tracking-tight">CompuERP</span>}
+          {!collapsed && (
+            <div className="min-w-0">
+              <div className="truncate text-sm font-black leading-tight">ServiCompu</div>
+              <div className="truncate text-[10px] uppercase tracking-widest text-muted-foreground">Yarango</div>
+            </div>
+          )}
         </div>
       </SidebarHeader>
       <SidebarContent>
@@ -75,7 +87,7 @@ export function AppSidebar() {
             <Button asChild size={collapsed ? "icon" : "lg"} className="w-full shadow-lg" style={{ background: "var(--gradient-primary)" }}>
               <Link to="/consultar" target="_blank">
                 <Search className="h-4 w-4" />
-                {!collapsed && <span className="ml-1 font-bold">CONSULTAR GARANTÍA</span>}
+                {!collapsed && <span className="ml-1 font-bold">PORTAL DE CLIENTES</span>}
               </Link>
             </Button>
           </SidebarGroupContent>
