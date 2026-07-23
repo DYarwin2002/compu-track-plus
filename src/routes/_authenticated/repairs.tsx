@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/table";
 import { Plus, Pencil, Wrench, Search } from "lucide-react";
 import { toast } from "sonner";
-import { formatCurrency, formatDate } from "@/lib/format";
+import { formatSoles, formatDate } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/repairs")({
   head: () => ({
@@ -201,8 +201,10 @@ function RepairsPage() {
   };
 
   const quickStatus = async (r: Repair, s: Status) => {
-    const patch: Record<string, unknown> = { status: s };
-    if (s === "Entregado" && !r.delivered_at) patch.delivered_at = new Date().toISOString();
+    const patch = {
+      status: s,
+      delivered_at: s === "Entregado" && !r.delivered_at ? new Date().toISOString() : r.delivered_at,
+    };
     const { error } = await supabase.from("repairs").update(patch).eq("id", r.id);
     if (error) return toast.error(error.message);
     toast.success(`Estado: ${s}`);
@@ -290,7 +292,7 @@ function RepairsPage() {
                   </TableCell>
                   <TableCell className="text-sm">{r.technician ?? "—"}</TableCell>
                   <TableCell className="text-right text-sm">
-                    {formatCurrency(Number(r.cost_final || r.cost_estimate))}
+                    {formatSoles(Number(r.cost_final || r.cost_estimate))}
                   </TableCell>
                   <TableCell>
                     <Select value={r.status} onValueChange={(v) => quickStatus(r, v as Status)}>
