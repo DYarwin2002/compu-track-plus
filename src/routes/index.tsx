@@ -7,10 +7,10 @@ import { Monitor, ShieldCheck, Zap, BarChart3, Search } from "lucide-react";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "CompuERP — ERP para venta y garantías de computadoras" },
-      { name: "description", content: "Registra ventas, controla stock, genera boletas y consulta garantías en segundos." },
-      { property: "og:title", content: "CompuERP" },
-      { property: "og:description", content: "ERP para tu negocio de venta y reparación de computadoras." },
+      { title: "ServiCompu Yarango — Sistema para tu tienda de cómputo" },
+      { name: "description", content: "Ventas, garantías y servicio técnico en un solo sistema. Consulta tu garantía o descarga tu boleta en segundos." },
+      { property: "og:title", content: "ServiCompu Yarango" },
+      { property: "og:description", content: "Sistema para venta y reparación de computadoras." },
     ],
   }),
   component: Landing,
@@ -31,17 +31,17 @@ function Landing() {
             <div className="grid h-9 w-9 place-items-center rounded-lg" style={{ background: "var(--gradient-primary)" }}>
               <Monitor className="h-5 w-5 text-primary-foreground" />
             </div>
-            <span className="text-lg font-bold tracking-tight">CompuERP</span>
+            <span className="text-lg font-bold tracking-tight">ServiCompu Yarango</span>
           </Link>
           <div className="flex items-center gap-2">
-            <Button asChild variant="ghost"><Link to="/consultar">Consultar garantía</Link></Button>
+            <Button asChild variant="ghost"><Link to="/consultar">Portal de clientes</Link></Button>
             <Button asChild><Link to="/auth">Ingresar</Link></Button>
           </div>
         </div>
       </header>
       <section className="mx-auto max-w-6xl px-6 pt-20 pb-14 text-center">
         <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs text-muted-foreground">
-          <Zap className="h-3.5 w-3.5 text-primary" /> ERP rápido para tu tienda de cómputo
+          <Zap className="h-3.5 w-3.5 text-primary" /> ServiCompu Yarango · sistema integral
         </span>
         <h1 className="mt-6 text-5xl font-black tracking-tight sm:text-6xl">
           Vende, factura y controla{" "}
@@ -49,12 +49,12 @@ function Landing() {
           en segundos.
         </h1>
         <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
-          Registra productos con número de serie, genera boletas imprimibles y verifica garantías al instante frente al cliente.
+          Ventas, garantías, servicio técnico y descarga de boletas para tus clientes. Todo en un solo sistema.
         </p>
         <div className="mt-8 flex flex-wrap justify-center gap-3">
           <Button asChild size="lg"><Link to="/auth">Empezar ahora</Link></Button>
           <Button asChild size="lg" variant="outline">
-            <Link to="/consultar"><Search className="mr-2 h-4 w-4" /> Consultar garantía</Link>
+            <Link to="/consultar"><Search className="mr-2 h-4 w-4" /> Portal de clientes</Link>
           </Button>
         </div>
       </section>
