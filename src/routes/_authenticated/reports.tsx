@@ -5,9 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Download, TrendingUp, Package, ShieldCheck } from "lucide-react";
 import { formatSoles, formatDate } from "@/lib/format";
+import { useAuth } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/_authenticated/reports")({
-  head: () => ({ meta: [{ title: "Reportes — CompuERP" }, { name: "description", content: "Reportes de ventas y garantías." }] }),
+  head: () => ({ meta: [{ title: "Reportes — ServiCompu Yarango" }, { name: "description", content: "Reportes de ventas y garantías." }] }),
   component: Reports,
 });
 
@@ -16,6 +17,8 @@ type TopProduct = { product_name: string; qty: number; revenue: number };
 type BrandRow = { brand: string; qty: number };
 
 function Reports() {
+  const { can } = useAuth();
+  const canExport = can("reports.export");
   const [daily, setDaily] = useState<DailySale[]>([]);
   const [top, setTop] = useState<TopProduct[]>([]);
   const [brands, setBrands] = useState<BrandRow[]>([]);
@@ -78,7 +81,7 @@ function Reports() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Ventas de los últimos 30 días</CardTitle>
-          <Button size="sm" variant="outline" onClick={() => exportCSV("ventas-diarias", ["Fecha", "Ventas", "Total"], daily.map((d) => [d.day, d.count, d.total.toFixed(2)]))}><Download className="mr-2 h-3 w-3" /> CSV</Button>
+            {canExport && <Button size="sm" variant="outline" onClick={() => exportCSV("ventas-diarias", ["Fecha", "Ventas", "Total"], daily.map((d) => [d.day, d.count, d.total.toFixed(2)]))}><Download className="mr-2 h-3 w-3" /> CSV</Button>}
         </CardHeader>
         <CardContent>
           {daily.length === 0 ? <p className="text-sm text-muted-foreground">Sin datos.</p> : (
@@ -100,7 +103,7 @@ function Reports() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Productos más vendidos</CardTitle>
-            <Button size="sm" variant="outline" onClick={() => exportCSV("top-productos", ["Producto", "Cantidad", "Ingresos"], top.map((t) => [t.product_name, t.qty, t.revenue.toFixed(2)]))}><Download className="mr-2 h-3 w-3" /> CSV</Button>
+            {canExport && <Button size="sm" variant="outline" onClick={() => exportCSV("top-productos", ["Producto", "Cantidad", "Ingresos"], top.map((t) => [t.product_name, t.qty, t.revenue.toFixed(2)]))}><Download className="mr-2 h-3 w-3" /> CSV</Button>}
           </CardHeader>
           <CardContent>
             <ul className="space-y-2">
@@ -118,7 +121,7 @@ function Reports() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Equipos vendidos por marca</CardTitle>
-            <Button size="sm" variant="outline" onClick={() => exportCSV("por-marca", ["Marca", "Cantidad"], brands.map((b) => [b.brand, b.qty]))}><Download className="mr-2 h-3 w-3" /> CSV</Button>
+            {canExport && <Button size="sm" variant="outline" onClick={() => exportCSV("por-marca", ["Marca", "Cantidad"], brands.map((b) => [b.brand, b.qty]))}><Download className="mr-2 h-3 w-3" /> CSV</Button>}
           </CardHeader>
           <CardContent>
             <ul className="space-y-2">
