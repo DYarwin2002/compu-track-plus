@@ -15,7 +15,7 @@ import { IGV_RATE, formatSoles } from "@/lib/format";
 import { useAuth } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/_authenticated/sales/new")({
-  head: () => ({ meta: [{ title: "Nueva venta — CompuERP" }, { name: "description", content: "Registrar una nueva venta." }] }),
+  head: () => ({ meta: [{ title: "Nueva venta — ServiCompu Yarango" }, { name: "description", content: "Registrar una nueva venta." }] }),
   component: NewSale,
 });
 
@@ -25,7 +25,9 @@ type LineItem = { key: string; product_id: string | null; product_name: string; 
 
 function NewSale() {
   const nav = useNavigate();
-  const { user } = useAuth();
+  const { user, can } = useAuth();
+  const canCreate = can("sales.create");
+  const canCreateCustomer = can("customers.manage");
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [customerId, setCustomerId] = useState<string | null>(null);
@@ -64,6 +66,7 @@ function NewSale() {
   }, [items, discount]);
 
   const createCustomer = async () => {
+    if (!canCreateCustomer) return toast.error("No tienes permiso para crear clientes");
     if (!newCust.document || !newCust.full_name) return toast.error("DNI/RUC y nombre son obligatorios");
     const { data, error } = await supabase.from("customers").insert(newCust).select().single();
     if (error) return toast.error(error.message);
@@ -73,6 +76,7 @@ function NewSale() {
   };
 
   const submit = async () => {
+    if (!canCreate) return toast.error("No tienes permiso para registrar ventas");
     if (items.length === 0) return toast.error("Agrega al menos un producto");
     setSaving(true);
     const { data: sale, error } = await supabase.from("sales").insert({
@@ -174,7 +178,7 @@ function NewSale() {
                   </Command>
                 </PopoverContent>
               </Popover>
-              <div className="rounded-lg border border-dashed border-border p-3">
+              {canCreateCustomer && <div className="rounded-lg border border-dashed border-border p-3">
                 <p className="mb-2 text-xs font-medium text-muted-foreground">O crea uno rápido</p>
                 <div className="space-y-2">
                   <Input placeholder="DNI / RUC" value={newCust.document} onChange={(e) => setNewCust({ ...newCust, document: e.target.value })} />
@@ -182,7 +186,7 @@ function NewSale() {
                   <Input placeholder="Teléfono" value={newCust.phone} onChange={(e) => setNewCust({ ...newCust, phone: e.target.value })} />
                   <Button size="sm" variant="secondary" className="w-full" onClick={createCustomer}>Crear cliente</Button>
                 </div>
-              </div>
+              </div>}
             </CardContent>
           </Card>
 
@@ -204,8 +208,8 @@ function NewSale() {
                   <SelectContent>{["Efectivo", "Yape", "Transferencia", "Tarjeta"].map((p) => <SelectItem key={p} value={p}>{p}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
-              <Button className="w-full" size="lg" onClick={submit} disabled={saving || items.length === 0}>
-                {saving ? "Registrando…" : "Registrar venta"}
+              <Button className="w-full" size="lg" onClick={submit} disabled={saving || items.length === 0 || !canCreate}>
+                {saving ? "Registrando…" : canCreate ? "Registrar venta" : "Sin permiso"}
               </Button>
             </CardContent>
           </Card>
