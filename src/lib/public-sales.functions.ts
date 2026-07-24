@@ -55,7 +55,7 @@ export type PublicRepairLite = {
   status: string;
   reported_issue: string | null;
   diagnosis: string | null;
-  estimated_cost: number | null;
+  cost_estimate: number | null;
 };
 
 export type PublicCustomerHistory = {
@@ -190,7 +190,7 @@ export const getPublicCustomerHistory = createServerFn({ method: "POST" })
         .limit(100),
       supabaseAdmin
         .from("repairs")
-        .select("id, order_number, received_at, device, serial_number, status, reported_issue, diagnosis, estimated_cost")
+        .select("id, order_number, received_at, device, serial_number, status, reported_issue, diagnosis, cost_estimate")
         .eq("customer_id", cust.id)
         .order("received_at", { ascending: false })
         .limit(50),
@@ -217,7 +217,7 @@ export const getPublicCustomerHistory = createServerFn({ method: "POST" })
         status: r.status,
         reported_issue: r.reported_issue,
         diagnosis: r.diagnosis,
-        estimated_cost: r.estimated_cost !== null ? Number(r.estimated_cost) : null,
+        cost_estimate: r.cost_estimate !== null ? Number(r.cost_estimate) : null,
       })),
     };
   });
