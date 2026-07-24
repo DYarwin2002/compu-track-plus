@@ -35,6 +35,35 @@ const fullSchema = z.object({
   verifier: z.string().trim().min(3).max(32),
 });
 
+export type PublicWarrantyLite = {
+  id: string;
+  product_name: string;
+  serial_number: string | null;
+  sale_number: string | null;
+  sale_date: string;
+  expires_at: string;
+  status: string;
+  duration_months: number;
+};
+
+export type PublicRepairLite = {
+  id: string;
+  order_number: string;
+  received_at: string;
+  device: string;
+  serial_number: string | null;
+  status: string;
+  reported_issue: string | null;
+  diagnosis: string | null;
+  estimated_cost: number | null;
+};
+
+export type PublicCustomerHistory = {
+  sales: PublicSaleSummary[];
+  warranties: PublicWarrantyLite[];
+  repairs: PublicRepairLite[];
+};
+
 function stripSummary(row: {
   id: string;
   sale_number: string;
@@ -129,6 +158,66 @@ export const getPublicSalePdfData = createServerFn({ method: "POST" })
         unit_price: Number(i.unit_price),
         line_total: Number(i.line_total),
         warranty_months: Number(i.warranty_months),
+      })),
+    };
+  });
+
+/**
+ * Full public history for a customer document: sales, warranties, and repairs.
+ * Uses the document as verifier — reveals nothing without a matching customer.
+ */
+export const getPublicCustomerHistory = createServerFn({ method: "POST" })
+  .inputValidator((i: unknown) => docSchema.parse(i))
+  .handler(async ({ data }): Promise<PublicCustomerHistory> => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const doc = data.document.trim();
+    const { data: cust } = await supabaseAdmin
+      .from("customers").select("id").eq("document", doc).maybeSingle();
+    if (!cust) return { sales: [], warranties: [], repairs: [] };
+
+    const [{ data: sales }, { data: warranties }, { data: repairs }] = await Promise.all([
+      supabaseAdmin
+        .from("sales")
+        .select("id, sale_number, sale_date, total")
+        .eq("customer_id", cust.id)
+        .order("sale_date", { ascending: false })
+        .limit(50),
+      supabaseAdmin
+        .from("warranties")
+        .select("id, product_name, serial_number, sale_date, expires_at, status, duration_months, sales(sale_number)")
+        .eq("customer_id", cust.id)
+        .order("expires_at", { ascending: false })
+        .limit(100),
+      supabaseAdmin
+        .from("repairs")
+        .select("id, order_number, received_at, device, serial_number, status, reported_issue, diagnosis, estimated_cost")
+        .eq("customer_id", cust.id)
+        .order("received_at", { ascending: false })
+        .limit(50),
+    ]);
+
+    return {
+      sales: (sales ?? []).map(stripSummary),
+      warranties: (warranties ?? []).map((w) => ({
+        id: w.id,
+        product_name: w.product_name,
+        serial_number: w.serial_number,
+        sale_number: w.sales?.sale_number ?? null,
+        sale_date: w.sale_date,
+        expires_at: w.expires_at,
+        status: w.status,
+        duration_months: Number(w.duration_months),
+      })),
+      repairs: (repairs ?? []).map((r) => ({
+        id: r.id,
+        order_number: r.order_number,
+        received_at: r.received_at,
+        device: r.device,
+        serial_number: r.serial_number,
+        status: r.status,
+        reported_issue: r.reported_issue,
+        diagnosis: r.diagnosis,
+        estimated_cost: r.estimated_cost !== null ? Number(r.estimated_cost) : null,
       })),
     };
   });
