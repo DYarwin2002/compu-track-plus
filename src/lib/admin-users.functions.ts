@@ -42,13 +42,18 @@ export const createSeller = createServerFn({ method: "POST" })
         email: z.string().trim().email().max(255),
         password: z.string().min(8).max(128),
         full_name: z.string().trim().min(2).max(120),
-        role: z.enum(["admin", "vendedor"]).default("vendedor"),
+        role: z.string().trim().min(2).max(32).default("vendedor"),
       })
       .parse(data),
   )
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    // Validate role exists
+    const { data: role } = await supabaseAdmin
+      .from("roles").select("key").eq("key", data.role).maybeSingle();
+    if (!role) throw new Error("El rol seleccionado no existe.");
 
     const { data: created, error } = await supabaseAdmin.auth.admin.createUser({
       email: data.email,
@@ -58,18 +63,9 @@ export const createSeller = createServerFn({ method: "POST" })
     });
     if (error || !created.user) throw new Error(error?.message ?? "No se pudo crear el usuario");
 
-    // Trigger handle_new_user has already inserted profile + default role.
-    // Overwrite role if admin picked a specific one.
-    if (data.role === "admin") {
-      await supabaseAdmin
-        .from("user_roles")
-        .upsert({ user_id: created.user.id, role: "admin" }, { onConflict: "user_id,role" });
-      await supabaseAdmin
-        .from("user_roles")
-        .delete()
-        .eq("user_id", created.user.id)
-        .neq("role", "admin");
-    }
+    // Trigger handle_new_user assigned a default role; force the picked role.
+    await supabaseAdmin.from("user_roles").delete().eq("user_id", created.user.id);
+    await supabaseAdmin.from("user_roles").insert({ user_id: created.user.id, role: data.role });
 
     await context.supabase.from("audit_log").insert({
       user_id: context.userId,
@@ -86,7 +82,7 @@ export const createSeller = createServerFn({ method: "POST" })
 export const updateSellerRole = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) =>
-    z.object({ user_id: z.string().uuid(), role: z.enum(["admin", "vendedor"]) }).parse(data),
+    z.object({ user_id: z.string().uuid(), role: z.string().trim().min(2).max(32) }).parse(data),
   )
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
@@ -94,6 +90,9 @@ export const updateSellerRole = createServerFn({ method: "POST" })
       throw new Error("No puedes quitarte a ti mismo el rol de administrador.");
     }
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: role } = await supabaseAdmin
+      .from("roles").select("key").eq("key", data.role).maybeSingle();
+    if (!role) throw new Error("El rol seleccionado no existe.");
     await supabaseAdmin.from("user_roles").delete().eq("user_id", data.user_id);
     const { error } = await supabaseAdmin
       .from("user_roles")
