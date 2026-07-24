@@ -14,7 +14,7 @@ import { formatSoles } from "@/lib/format";
 import { useAuth } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/_authenticated/products")({
-  head: () => ({ meta: [{ title: "Productos — CompuERP" }, { name: "description", content: "Inventario de productos." }] }),
+  head: () => ({ meta: [{ title: "Productos — ServiCompu Yarango" }, { name: "description", content: "Inventario de productos." }] }),
   component: Products,
 });
 
@@ -29,7 +29,9 @@ const CONDITIONS = ["Nuevo", "Usado", "Reacondicionado"];
 const empty: Partial<Product> = { sku: "", name: "", brand: "", model: "", serial_number: "", category: "Laptop", purchase_price: 0, sale_price: 0, stock: 1, condition: "Nuevo", default_warranty_months: 12 };
 
 function Products() {
-  const { role } = useAuth();
+  const { role, can } = useAuth();
+  const canManage = can("products.manage");
+  const canViewCost = can("products.view_cost");
   const [rows, setRows] = useState<Product[]>([]);
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
@@ -63,7 +65,7 @@ function Products() {
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div><h1 className="text-2xl font-black">Productos</h1><p className="text-sm text-muted-foreground">Inventario y control de stock.</p></div>
-        <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) setEditing(empty); }}>
+        {canManage && <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) setEditing(empty); }}>
           <DialogTrigger asChild><Button><Plus className="mr-2 h-4 w-4" /> Nuevo producto</Button></DialogTrigger>
           <DialogContent className="max-w-2xl">
             <DialogHeader><DialogTitle>{editing.id ? "Editar" : "Nuevo"} producto</DialogTitle></DialogHeader>
@@ -85,14 +87,14 @@ function Products() {
                   <SelectContent>{CONDITIONS.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
                 </Select>
               </Field>
-              <Field label="Precio de compra"><Input type="number" step="0.01" value={editing.purchase_price ?? 0} onChange={(e) => setEditing({ ...editing, purchase_price: parseFloat(e.target.value) })} /></Field>
+              {canViewCost && <Field label="Precio de compra"><Input type="number" step="0.01" value={editing.purchase_price ?? 0} onChange={(e) => setEditing({ ...editing, purchase_price: parseFloat(e.target.value) })} /></Field>}
               <Field label="Precio de venta"><Input type="number" step="0.01" value={editing.sale_price ?? 0} onChange={(e) => setEditing({ ...editing, sale_price: parseFloat(e.target.value) })} /></Field>
               <Field label="Stock"><Input type="number" value={editing.stock ?? 0} onChange={(e) => setEditing({ ...editing, stock: parseInt(e.target.value) })} /></Field>
               <Field label="Garantía (meses)"><Input type="number" value={editing.default_warranty_months ?? 12} onChange={(e) => setEditing({ ...editing, default_warranty_months: parseInt(e.target.value) })} /></Field>
             </div>
             <DialogFooter><Button onClick={save}>Guardar</Button></DialogFooter>
           </DialogContent>
-        </Dialog>
+        </Dialog>}
       </div>
 
       <div className="relative max-w-md">
@@ -120,7 +122,7 @@ function Products() {
                 <TableCell className="text-right"><Badge variant={p.stock === 0 ? "destructive" : p.stock < 3 ? "secondary" : "default"}>{p.stock}</Badge></TableCell>
                 <TableCell><Badge variant="outline">{p.condition}</Badge></TableCell>
                 <TableCell className="text-right">
-                  <Button size="icon" variant="ghost" onClick={() => { setEditing(p); setOpen(true); }}><Pencil className="h-4 w-4" /></Button>
+                  {canManage && <Button size="icon" variant="ghost" onClick={() => { setEditing(p); setOpen(true); }}><Pencil className="h-4 w-4" /></Button>}
                   {role === "admin" && <Button size="icon" variant="ghost" onClick={() => remove(p.id)}><Trash2 className="h-4 w-4" /></Button>}
                 </TableCell>
               </TableRow>
