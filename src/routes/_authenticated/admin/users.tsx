@@ -26,11 +26,12 @@ import { toast } from "sonner";
 import { UserPlus, KeyRound } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { formatDate } from "@/lib/format";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/admin/users")({
   head: () => ({
     meta: [
-      { title: "Usuarios — CompuERP" },
+      { title: "Usuarios — ServiCompu Yarango" },
       { name: "description", content: "Administración de vendedores y administradores del ERP." },
     ],
   }),
@@ -38,6 +39,7 @@ export const Route = createFileRoute("/_authenticated/admin/users")({
 });
 
 type Seller = Awaited<ReturnType<typeof listSellers>>[number];
+type RoleOpt = { key: string; label: string };
 
 function AdminUsers() {
   const { user } = useAuth();
@@ -48,16 +50,24 @@ function AdminUsers() {
   const runReset = useServerFn(resetSellerPassword);
 
   const [rows, setRows] = useState<Seller[]>([]);
+  const [roleOpts, setRoleOpts] = useState<RoleOpt[]>([]);
   const [loading, setLoading] = useState(true);
   const [openNew, setOpenNew] = useState(false);
-  const [form, setForm] = useState({ email: "", password: "", full_name: "", role: "vendedor" as "admin" | "vendedor" });
+  const [form, setForm] = useState({ email: "", password: "", full_name: "", role: "vendedor" });
   const [busy, setBusy] = useState(false);
   const [resetFor, setResetFor] = useState<Seller | null>(null);
   const [newPassword, setNewPassword] = useState("");
 
   const reload = async () => {
     setLoading(true);
-    try { setRows(await runList()); }
+    try {
+      const [list, { data: roles }] = await Promise.all([
+        runList(),
+        supabase.from("roles").select("key, label").order("sort_order"),
+      ]);
+      setRows(list);
+      setRoleOpts((roles ?? []) as RoleOpt[]);
+    }
     catch (e) { toast.error(e instanceof Error ? e.message : "Error"); }
     finally { setLoading(false); }
   };
@@ -77,7 +87,7 @@ function AdminUsers() {
     } finally { setBusy(false); }
   };
 
-  const changeRole = async (u: Seller, role: "admin" | "vendedor") => {
+  const changeRole = async (u: Seller, role: string) => {
     try { await runRole({ data: { user_id: u.id, role } }); toast.success("Rol actualizado"); reload(); }
     catch (e) { toast.error(e instanceof Error ? e.message : "Error"); }
   };
@@ -118,11 +128,12 @@ function AdminUsers() {
               <div><Label>Contraseña temporal</Label><Input type="text" required minLength={8} value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} /></div>
               <div>
                 <Label>Rol</Label>
-                <Select value={form.role} onValueChange={(v) => setForm({ ...form, role: v as "admin" | "vendedor" })}>
+                <Select value={form.role} onValueChange={(v) => setForm({ ...form, role: v })}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="vendedor">Vendedor</SelectItem>
-                    <SelectItem value="admin">Administrador</SelectItem>
+                    {roleOpts.map((r) => (
+                      <SelectItem key={r.key} value={r.key}>{r.label}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -158,11 +169,12 @@ function AdminUsers() {
                     <TableCell className="font-medium">{u.full_name ?? "—"}{isSelf && <span className="ml-2 text-xs text-muted-foreground">(tú)</span>}</TableCell>
                     <TableCell>{u.email ?? "—"}</TableCell>
                     <TableCell>
-                      <Select value={u.role} onValueChange={(v) => changeRole(u, v as "admin" | "vendedor")} disabled={isSelf}>
+                      <Select value={u.role} onValueChange={(v) => changeRole(u, v)} disabled={isSelf}>
                         <SelectTrigger className="w-36"><SelectValue /></SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="vendedor">Vendedor</SelectItem>
-                          <SelectItem value="admin">Administrador</SelectItem>
+                          {roleOpts.map((r) => (
+                            <SelectItem key={r.key} value={r.key}>{r.label}</SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     </TableCell>

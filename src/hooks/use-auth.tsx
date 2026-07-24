@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import type { Permission } from "@/lib/permissions";
 
-type Role = "admin" | "vendedor" | null;
+type Role = string | null;
 
 interface AuthCtx {
   session: Session | null;
@@ -46,13 +46,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setPermissions(new Set());
       return;
     }
-    const r = (roleRow?.role as Role) ?? "vendedor";
+    const r = (roleRow?.role as string | null) ?? "vendedor";
     setRole(r);
     // Load permissions for this role. Admin implicitly has all.
     const { data: perms } = await supabase
       .from("role_permissions")
       .select("permission")
-      .eq("role", r);
+      .eq("role", r as never);
     setPermissions(new Set((perms ?? []).map((p) => p.permission as Permission)));
   };
 
