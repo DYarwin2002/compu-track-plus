@@ -5,20 +5,21 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   Package, ShieldCheck, ShieldAlert, ShieldX, ShoppingCart, TrendingUp,
-  Wrench, ArrowUpRight, ArrowDownRight, Search,
+  Wrench, ArrowUpRight, ArrowDownRight, Search, Users, PlusCircle, ArrowRight,
 } from "lucide-react";
 import { formatSoles, formatDate } from "@/lib/format";
 import { useAuth } from "@/hooks/use-auth";
-import {
-  AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
-  BarChart, Bar, PieChart, Pie, Cell, Legend,
-} from "recharts";
+import { AreaChart, Area, ResponsiveContainer, Tooltip } from "recharts";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
     meta: [
-      { title: "Dashboard — ServiCompu Yarango" },
-      { name: "description", content: "Panel de control con métricas de ventas, garantías y servicio técnico." },
+      { title: "Panel de trabajo — ServiCompu Yarango" },
+      { name: "description", content: "Panel de trabajo diario: ventas, garantías por vencer y órdenes de servicio pendientes." },
+      { property: "og:title", content: "Panel de trabajo — ServiCompu Yarango" },
+      { property: "og:description", content: "Accesos rápidos y pendientes del día para la tienda." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: Dashboard,
@@ -28,27 +29,33 @@ type Kpi = {
   monthSales: number;
   prevMonthSales: number;
   monthCount: number;
+  todaySales: number;
+  todayCount: number;
   stockUnits: number;
   lowStock: number;
   activeWarranties: number;
   soonWarranties: number;
   expiredWarranties: number;
   openRepairs: number;
+  readyRepairs: number;
 };
 
 type SaleRow = { id: string; sale_number: string; sale_date: string; total: number };
 type RepairRow = { id: string; order_number: string; device: string; status: string; created_at: string };
 type SeriesPoint = { day: string; total: number };
-type TopProduct = { name: string; qty: number };
+
+function greeting() {
+  const h = new Date().getHours();
+  if (h < 12) return "Buenos días";
+  if (h < 19) return "Buenas tardes";
+  return "Buenas noches";
+}
 
 function Dashboard() {
   const { can, role } = useAuth();
   const canGlobal = can("dashboard.view_global");
   const [kpi, setKpi] = useState<Kpi | null>(null);
   const [series, setSeries] = useState<SeriesPoint[]>([]);
-  const [top, setTop] = useState<TopProduct[]>([]);
-  const [warrantyDist, setWarrantyDist] = useState<Array<{ name: string; value: number }>>([]);
-  const [repairDist, setRepairDist] = useState<Array<{ name: string; value: number }>>([]);
   const [recentSales, setRecentSales] = useState<SaleRow[]>([]);
   const [recentRepairs, setRecentRepairs] = useState<RepairRow[]>([]);
 
@@ -60,56 +67,54 @@ function Dashboard() {
       const startMonth = new Date(now.getFullYear(), now.getMonth(), 1);
       const startPrevMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
       const endPrevMonth = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
+      const startToday = new Date(); startToday.setHours(0, 0, 0, 0);
       const start14 = new Date(); start14.setDate(start14.getDate() - 13); start14.setHours(0, 0, 0, 0);
-      const today = new Date().toISOString().slice(0, 10);
-      const in30 = new Date(); in30.setDate(in30.getDate() + 30);
 
       const [
-        monthQ, prevQ, series14Q, itemsQ, warrCountsQ, repairCountsQ,
-        stockQ, lowStockQ, recentSalesQ, recentRepairsQ,
+        monthQ, prevQ, todayQ, series14Q, warrCountsQ, repairCountsQ,
+        stockQ, recentSalesQ, recentRepairsQ,
       ] = await Promise.all([
         supabase.from("sales").select("id, total").gte("sale_date", startMonth.toISOString()),
         supabase.from("sales").select("id, total")
           .gte("sale_date", startPrevMonth.toISOString())
           .lte("sale_date", endPrevMonth.toISOString()),
+        supabase.from("sales").select("id, total").gte("sale_date", startToday.toISOString()),
         supabase.from("sales").select("sale_date, total").gte("sale_date", start14.toISOString()),
-        supabase.from("sale_items").select("product_name, quantity, sales!inner(sale_date)")
-          .gte("sales.sale_date", startMonth.toISOString()),
         supabase.from("warranties").select("status"),
         supabase.from("repairs").select("status"),
-        supabase.from("products").select("stock"),
         supabase.from("products").select("id, stock"),
         supabase.from("sales").select("id, sale_number, sale_date, total")
-          .order("sale_date", { ascending: false }).limit(6),
+          .order("sale_date", { ascending: false }).limit(5),
         supabase.from("repairs").select("id, order_number, device, status, created_at")
-          .order("created_at", { ascending: false }).limit(6),
+          .order("created_at", { ascending: false }).limit(5),
       ]);
 
-      // KPI
-      const monthSales = (monthQ.data ?? []).reduce((s, r) => s + Number(r.total || 0), 0);
-      const prevMonthSales = (prevQ.data ?? []).reduce((s, r) => s + Number(r.total || 0), 0);
-      const stockUnits = (stockQ.data ?? []).reduce((s, p) => s + (p.stock || 0), 0);
-      const lowStock = (lowStockQ.data ?? []).filter((p) => (p.stock ?? 0) <= 3).length;
+      const sum = (rows: Array<{ total: number | string }> | null) =>
+        (rows ?? []).reduce((s, r) => s + Number(r.total || 0), 0);
+
       const warrCount = (warrCountsQ.data ?? []).reduce<Record<string, number>>((acc, r) => {
         acc[r.status] = (acc[r.status] ?? 0) + 1; return acc;
       }, {});
       const repairCount = (repairCountsQ.data ?? []).reduce<Record<string, number>>((acc, r) => {
         acc[r.status] = (acc[r.status] ?? 0) + 1; return acc;
       }, {});
-      const openRepairs = ["Recibido", "Diagnostico", "En reparacion", "Listo"]
-        .reduce((s, k) => s + (repairCount[k] ?? 0), 0);
 
       setKpi({
-        monthSales, prevMonthSales,
+        monthSales: sum(monthQ.data),
+        prevMonthSales: sum(prevQ.data),
         monthCount: (monthQ.data ?? []).length,
-        stockUnits, lowStock,
+        todaySales: sum(todayQ.data),
+        todayCount: (todayQ.data ?? []).length,
+        stockUnits: (stockQ.data ?? []).reduce((s, p) => s + (p.stock || 0), 0),
+        lowStock: (stockQ.data ?? []).filter((p) => (p.stock ?? 0) <= 3).length,
         activeWarranties: warrCount["Activa"] ?? 0,
         soonWarranties: warrCount["Próxima a vencer"] ?? 0,
         expiredWarranties: warrCount["Vencida"] ?? 0,
-        openRepairs,
+        openRepairs: ["Recibido", "Diagnostico", "En reparacion"]
+          .reduce((s, k) => s + (repairCount[k] ?? 0), 0),
+        readyRepairs: repairCount["Listo"] ?? 0,
       });
 
-      // 14-day series
       const map = new Map<string, number>();
       for (let i = 0; i < 14; i++) {
         const d = new Date(start14); d.setDate(start14.getDate() + i);
@@ -123,29 +128,8 @@ function Dashboard() {
         day: day.slice(5), total: Math.round(total),
       })));
 
-      // Top products this month
-      const agg = new Map<string, number>();
-      (itemsQ.data ?? []).forEach((r: { product_name: string; quantity: number }) => {
-        agg.set(r.product_name, (agg.get(r.product_name) ?? 0) + Number(r.quantity || 0));
-      });
-      setTop(Array.from(agg.entries())
-        .map(([name, qty]) => ({ name, qty }))
-        .sort((a, b) => b.qty - a.qty)
-        .slice(0, 5));
-
-      setWarrantyDist([
-        { name: "Activa", value: warrCount["Activa"] ?? 0 },
-        { name: "Próxima", value: warrCount["Próxima a vencer"] ?? 0 },
-        { name: "Vencida", value: warrCount["Vencida"] ?? 0 },
-      ].filter((d) => d.value > 0));
-
-      setRepairDist(["Recibido", "Diagnostico", "En reparacion", "Listo", "Entregado", "Cancelado"]
-        .map((s) => ({ name: s, value: repairCount[s] ?? 0 })));
-
       setRecentSales((recentSalesQ.data ?? []) as SaleRow[]);
       setRecentRepairs((recentRepairsQ.data ?? []) as RepairRow[]);
-
-      void today; void in30;
     })();
   }, []);
 
@@ -155,151 +139,142 @@ function Dashboard() {
     return ((kpi.monthSales - kpi.prevMonthSales) / kpi.prevMonthSales) * 100;
   }, [kpi]);
 
+  const tasks = useMemo(() => {
+    if (!kpi) return [];
+    const list: { key: string; label: string; hint: string; to: string; tone: "warn" | "danger" | "ok"; Icon: typeof ShieldAlert }[] = [];
+    if (kpi.soonWarranties > 0)
+      list.push({ key: "soon", label: `${kpi.soonWarranties} garantía(s) por vencer`, hint: "Avisa a los clientes antes del vencimiento", to: "/warranties", tone: "warn", Icon: ShieldAlert });
+    if (kpi.expiredWarranties > 0)
+      list.push({ key: "exp", label: `${kpi.expiredWarranties} garantía(s) vencidas`, hint: "Revisa el listado y da seguimiento", to: "/warranties", tone: "danger", Icon: ShieldX });
+    if (kpi.readyRepairs > 0)
+      list.push({ key: "ready", label: `${kpi.readyRepairs} equipo(s) listos para entregar`, hint: "Contacta al cliente para el recojo", to: "/repairs", tone: "ok", Icon: Wrench });
+    if (kpi.lowStock > 0)
+      list.push({ key: "stock", label: `${kpi.lowStock} producto(s) con stock bajo`, hint: "Repón inventario antes de quedarte sin stock", to: "/products", tone: "warn", Icon: Package });
+    return list;
+  }, [kpi]);
+
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="text-3xl font-black tracking-tight">Hola 👋</h1>
-          <p className="text-sm text-muted-foreground">
-            {canGlobal ? "Vista global de ServiCompu Yarango." : `Panel para tu rol (${role ?? "…"}).`}
-          </p>
+      {/* Hero */}
+      <section
+        className="relative overflow-hidden rounded-2xl border border-border p-5 sm:p-7"
+        style={{ background: "var(--gradient-primary)" }}
+      >
+        <div className="absolute inset-0 bg-background/80 backdrop-blur-[2px]" aria-hidden />
+        <div className="relative flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-widest text-primary">
+              {canGlobal ? "Vista global" : `Rol: ${role ?? "…"}`}
+            </p>
+            <h1 className="mt-1 text-2xl font-black tracking-tight sm:text-3xl">{greeting()} 👋</h1>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Hoy llevas <span className="font-bold text-foreground">{formatSoles(kpi?.todaySales ?? 0)}</span> en{" "}
+              {kpi?.todayCount ?? 0} boleta(s).
+            </p>
+          </div>
+          <Link
+            to="/consultar" target="_blank"
+            className="inline-flex items-center gap-2 rounded-xl border border-border bg-card px-4 py-2 text-sm font-semibold transition hover:bg-muted"
+          >
+            <Search className="h-4 w-4" /> Portal de clientes
+          </Link>
         </div>
-        <Link
-          to="/consultar" target="_blank"
-          className="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold text-primary-foreground shadow-lg transition hover:opacity-90"
-          style={{ background: "var(--gradient-primary)" }}
-        >
-          <Search className="h-4 w-4" /> Portal de clientes
-        </Link>
-      </div>
+      </section>
 
-      {/* KPI row */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <KpiCard
-          label="Ventas del mes"
-          value={formatSoles(kpi?.monthSales ?? 0)}
-          sub={`${kpi?.monthCount ?? 0} boletas`}
-          delta={monthDelta}
-          Icon={TrendingUp}
-          accent
-        />
-        <KpiCard
-          label="Garantías activas"
-          value={String(kpi?.activeWarranties ?? 0)}
-          sub={`${kpi?.soonWarranties ?? 0} por vencer`}
-          Icon={ShieldCheck}
-        />
-        <KpiCard
-          label="Órdenes de servicio"
-          value={String(kpi?.openRepairs ?? 0)}
-          sub="En proceso"
-          Icon={Wrench}
-        />
-        <KpiCard
-          label="Stock total"
-          value={String(kpi?.stockUnits ?? 0)}
-          sub={`${kpi?.lowStock ?? 0} productos bajo mínimo`}
-          Icon={Package}
-          warn={(kpi?.lowStock ?? 0) > 0}
-        />
-      </div>
+      {/* Acciones rápidas */}
+      <section>
+        <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-muted-foreground">Acciones rápidas</h2>
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          {can("sales.create") && (
+            <QuickAction to="/sales/new" Icon={PlusCircle} title="Nueva venta" desc="Registrar boleta" primary />
+          )}
+          {can("repairs.manage") && (
+            <QuickAction to="/repairs" Icon={Wrench} title="Nueva orden" desc="Servicio técnico" />
+          )}
+          {can("customers.view") && (
+            <QuickAction to="/customers" Icon={Users} title="Clientes" desc="Buscar o registrar" />
+          )}
+          {can("warranties.view") && (
+            <QuickAction to="/warranties" Icon={ShieldCheck} title="Garantías" desc="Consultar por serie" />
+          )}
+        </div>
+      </section>
 
-      {/* Charts row */}
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <Card className="lg:col-span-2">
-          <CardHeader><CardTitle className="text-base">Ventas · últimos 14 días</CardTitle></CardHeader>
-          <CardContent className="h-72">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={series} margin={{ left: -10, right: 8, top: 8 }}>
-                <defs>
-                  <linearGradient id="salesGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="var(--color-primary)" stopOpacity={0.5} />
-                    <stop offset="100%" stopColor="var(--color-primary)" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
-                <XAxis dataKey="day" tick={{ fill: "var(--color-muted-foreground)", fontSize: 11 }} />
-                <YAxis tick={{ fill: "var(--color-muted-foreground)", fontSize: 11 }} />
-                <Tooltip
-                  contentStyle={{
-                    background: "var(--color-popover)", border: "1px solid var(--color-border)",
-                    borderRadius: 8, color: "var(--color-popover-foreground)", fontSize: 12,
-                  }}
-                  formatter={(v: number) => formatSoles(v)}
-                />
-                <Area type="monotone" dataKey="total" stroke="var(--color-primary)" fill="url(#salesGrad)" strokeWidth={2} />
-              </AreaChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
+      {/* Pendientes */}
+      <section>
+        <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-muted-foreground">Pendientes</h2>
+        {tasks.length === 0 ? (
+          <Card>
+            <CardContent className="flex items-center gap-3 py-5 text-sm text-muted-foreground">
+              <ShieldCheck className="h-5 w-5 text-emerald-500" />
+              Todo al día. No hay alertas pendientes.
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid gap-3 lg:grid-cols-2">
+            {tasks.map((t) => (
+              <Link
+                key={t.key}
+                to={t.to}
+                className={`flex items-center gap-3 rounded-xl border p-4 transition hover:bg-muted/50 ${
+                  t.tone === "danger" ? "border-destructive/40" : t.tone === "warn" ? "border-amber-500/40" : "border-emerald-500/40"
+                }`}
+              >
+                <div className={`grid h-10 w-10 shrink-0 place-items-center rounded-lg ${
+                  t.tone === "danger" ? "bg-destructive/10 text-destructive"
+                    : t.tone === "warn" ? "bg-amber-500/10 text-amber-500"
+                    : "bg-emerald-500/10 text-emerald-500"
+                }`}>
+                  <t.Icon className="h-5 w-5" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold">{t.label}</p>
+                  <p className="truncate text-xs text-muted-foreground">{t.hint}</p>
+                </div>
+                <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground" />
+              </Link>
+            ))}
+          </div>
+        )}
+      </section>
 
-        <Card>
-          <CardHeader><CardTitle className="text-base">Estado de garantías</CardTitle></CardHeader>
-          <CardContent className="h-72">
-            {warrantyDist.length === 0 ? (
-              <p className="pt-10 text-center text-sm text-muted-foreground">Sin datos aún</p>
-            ) : (
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie data={warrantyDist} dataKey="value" nameKey="name" innerRadius={50} outerRadius={80} paddingAngle={3}>
-                    {warrantyDist.map((_, i) => (
-                      <Cell key={i} fill={["var(--color-chart-1)","var(--color-chart-4)","var(--color-destructive)"][i % 3]} />
-                    ))}
-                  </Pie>
-                  <Tooltip contentStyle={{
-                    background: "var(--color-popover)", border: "1px solid var(--color-border)",
-                    borderRadius: 8, color: "var(--color-popover-foreground)", fontSize: 12,
-                  }} />
-                  <Legend wrapperStyle={{ fontSize: 12 }} />
-                </PieChart>
-              </ResponsiveContainer>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+      {/* Resumen */}
+      <section className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+        <KpiCard label="Ventas del mes" value={formatSoles(kpi?.monthSales ?? 0)} sub={`${kpi?.monthCount ?? 0} boletas`} delta={monthDelta} Icon={TrendingUp} accent />
+        <KpiCard label="Garantías activas" value={String(kpi?.activeWarranties ?? 0)} sub={`${kpi?.soonWarranties ?? 0} por vencer`} Icon={ShieldCheck} />
+        <KpiCard label="Órdenes abiertas" value={String(kpi?.openRepairs ?? 0)} sub={`${kpi?.readyRepairs ?? 0} listas`} Icon={Wrench} />
+        <KpiCard label="Stock total" value={String(kpi?.stockUnits ?? 0)} sub={`${kpi?.lowStock ?? 0} bajo mínimo`} Icon={Package} warn={(kpi?.lowStock ?? 0) > 0} />
+      </section>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <Card>
-          <CardHeader><CardTitle className="text-base">Top productos del mes</CardTitle></CardHeader>
-          <CardContent className="h-64">
-            {top.length === 0 ? (
-              <p className="pt-10 text-center text-sm text-muted-foreground">Sin ventas aún este mes</p>
-            ) : (
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={top} layout="vertical" margin={{ left: 20, right: 20 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" horizontal={false} />
-                  <XAxis type="number" tick={{ fill: "var(--color-muted-foreground)", fontSize: 11 }} />
-                  <YAxis type="category" dataKey="name" width={140} tick={{ fill: "var(--color-muted-foreground)", fontSize: 11 }} />
-                  <Tooltip contentStyle={{
-                    background: "var(--color-popover)", border: "1px solid var(--color-border)",
-                    borderRadius: 8, color: "var(--color-popover-foreground)", fontSize: 12,
-                  }} />
-                  <Bar dataKey="qty" fill="var(--color-primary)" radius={[0, 6, 6, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader><CardTitle className="text-base">Servicio técnico por estado</CardTitle></CardHeader>
-          <CardContent className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={repairDist} margin={{ left: -10, right: 8 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
-                <XAxis dataKey="name" tick={{ fill: "var(--color-muted-foreground)", fontSize: 10 }} interval={0} />
-                <YAxis tick={{ fill: "var(--color-muted-foreground)", fontSize: 11 }} allowDecimals={false} />
-                <Tooltip contentStyle={{
+      {/* Tendencia compacta */}
+      <Card>
+        <CardHeader className="pb-0">
+          <CardTitle className="text-base">Ventas · últimos 14 días</CardTitle>
+        </CardHeader>
+        <CardContent className="h-40 pt-4">
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={series} margin={{ left: 0, right: 0, top: 4, bottom: 0 }}>
+              <defs>
+                <linearGradient id="salesGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="var(--color-primary)" stopOpacity={0.45} />
+                  <stop offset="100%" stopColor="var(--color-primary)" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <Tooltip
+                contentStyle={{
                   background: "var(--color-popover)", border: "1px solid var(--color-border)",
                   borderRadius: 8, color: "var(--color-popover-foreground)", fontSize: 12,
-                }} />
-                <Bar dataKey="value" fill="var(--color-chart-2)" radius={[6, 6, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-      </div>
+                }}
+                labelFormatter={(l) => `Día ${l}`}
+                formatter={(v: number) => [formatSoles(v), "Ventas"]}
+              />
+              <Area type="monotone" dataKey="total" stroke="var(--color-primary)" fill="url(#salesGrad)" strokeWidth={2} />
+            </AreaChart>
+          </ResponsiveContainer>
+        </CardContent>
+      </Card>
 
+      {/* Actividad */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0">
@@ -338,7 +313,7 @@ function Dashboard() {
             ) : (
               <ul className="divide-y divide-border text-sm">
                 {recentRepairs.map((r) => (
-                  <li key={r.id} className="flex items-center justify-between py-2">
+                  <li key={r.id} className="flex items-center justify-between gap-3 py-2">
                     <div className="min-w-0">
                       <div className="font-mono text-xs">{r.order_number}</div>
                       <div className="truncate text-xs text-muted-foreground">{r.device}</div>
@@ -351,22 +326,34 @@ function Dashboard() {
           </CardContent>
         </Card>
       </div>
-
-      {kpi && kpi.expiredWarranties > 0 && (
-        <Card className="border-destructive/40">
-          <CardContent className="flex flex-wrap items-center justify-between gap-3 py-4">
-            <div className="flex items-center gap-3">
-              <ShieldX className="h-6 w-6 text-destructive" />
-              <div>
-                <p className="font-semibold">{kpi.expiredWarranties} garantía(s) vencidas</p>
-                <p className="text-xs text-muted-foreground">Revisa el listado y contacta a los clientes.</p>
-              </div>
-            </div>
-            <Link to="/warranties" className="text-sm font-medium text-primary hover:underline">Revisar →</Link>
-          </CardContent>
-        </Card>
-      )}
     </div>
+  );
+}
+
+function QuickAction({
+  to, Icon, title, desc, primary,
+}: {
+  to: string;
+  Icon: typeof ShoppingCart;
+  title: string;
+  desc: string;
+  primary?: boolean;
+}) {
+  return (
+    <Link
+      to={to}
+      className={`group flex flex-col gap-2 rounded-xl border p-4 transition hover:-translate-y-0.5 hover:shadow-lg ${
+        primary ? "border-primary/50 bg-primary/10" : "border-border bg-card"
+      }`}
+    >
+      <div className={`grid h-10 w-10 place-items-center rounded-lg ${primary ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"}`}>
+        <Icon className="h-5 w-5" />
+      </div>
+      <div>
+        <p className="text-sm font-bold">{title}</p>
+        <p className="text-xs text-muted-foreground">{desc}</p>
+      </div>
+    </Link>
   );
 }
 
@@ -385,21 +372,17 @@ function KpiCard({
   return (
     <Card className="relative overflow-hidden">
       {accent && (
-        <div
-          aria-hidden
-          className="absolute inset-0 opacity-10"
-          style={{ background: "var(--gradient-primary)" }}
-        />
+        <div aria-hidden className="absolute inset-0 opacity-10" style={{ background: "var(--gradient-primary)" }} />
       )}
       <CardContent className="relative p-4">
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</span>
-          <div className={`grid h-9 w-9 place-items-center rounded-lg ${warn ? "bg-destructive/10 text-destructive" : "bg-primary/10 text-primary"}`}>
+        <div className="flex items-center justify-between gap-2">
+          <span className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">{label}</span>
+          <div className={`grid h-8 w-8 shrink-0 place-items-center rounded-lg ${warn ? "bg-destructive/10 text-destructive" : "bg-primary/10 text-primary"}`}>
             <Icon className="h-4 w-4" />
           </div>
         </div>
-        <div className="mt-2 text-2xl font-black">{value}</div>
-        <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
+        <div className="mt-2 text-xl font-black sm:text-2xl">{value}</div>
+        <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
           {typeof delta === "number" && (
             <span className={`inline-flex items-center gap-0.5 font-semibold ${up ? "text-emerald-500" : "text-destructive"}`}>
               {up ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
