@@ -1,11 +1,14 @@
-import { createFileRoute, Link, useParams } from "@tanstack/react-router";
+import { createFileRoute, Link, useParams, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Printer, ArrowLeft, Download } from "lucide-react";
+import { Printer, ArrowLeft, Download, Trash2 } from "lucide-react";
 import { formatSoles, formatDateTime } from "@/lib/format";
 import { downloadBoletaPDF } from "@/lib/boleta-pdf";
+import { BUSINESS } from "@/lib/business";
+import { useAuth } from "@/hooks/use-auth";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/sales/$id")({
   head: () => ({ meta: [{ title: "Boleta — ServiCompu Yarango" }, { name: "description", content: "Detalle e impresión de boleta." }] }),
@@ -20,6 +23,8 @@ type SaleFull = {
 
 function SaleDetail() {
   const { id } = useParams({ from: "/_authenticated/sales/$id" });
+  const navigate = useNavigate();
+  const { isAdmin } = useAuth();
   const [sale, setSale] = useState<SaleFull | null>(null);
   const [format, setFormat] = useState<"a4" | "thermal">("a4");
 
@@ -62,6 +67,20 @@ function SaleDetail() {
               })),
             });
           }}><Download className="mr-2 h-4 w-4" /> PDF</Button>
+          {isAdmin && (
+            <Button
+              variant="destructive"
+              onClick={async () => {
+                if (!confirm(`¿Eliminar la boleta ${sale.sale_number}? Se borrarán sus productos y garantías.`)) return;
+                const { error } = await supabase.from("sales").delete().eq("id", sale.id);
+                if (error) return toast.error(error.message);
+                toast.success("Venta eliminada");
+                navigate({ to: "/sales" });
+              }}
+            >
+              <Trash2 className="mr-2 h-4 w-4" /> Eliminar
+            </Button>
+          )}
           <Button onClick={() => window.print()}><Printer className="mr-2 h-4 w-4" /> Imprimir</Button>
         </div>
       </div>
@@ -76,8 +95,10 @@ function BoletaA4({ sale }: { sale: SaleFull }) {
     <Card className="mx-auto max-w-3xl p-8 print:border-0 print:shadow-none">
       <div className="flex items-start justify-between border-b border-border pb-4">
         <div>
-          <h2 className="text-2xl font-black">ServiCompu Yarango</h2>
-          <p className="text-xs text-muted-foreground">Venta y reparación de computadoras</p>
+          <h2 className="text-2xl font-black">{BUSINESS.name}</h2>
+          <p className="text-xs text-muted-foreground">{BUSINESS.tagline}</p>
+          <p className="text-xs font-semibold">RUC {BUSINESS.ruc}</p>
+          <p className="text-xs text-muted-foreground">{BUSINESS.address}</p>
         </div>
         <div className="text-right">
           <p className="text-xs text-muted-foreground">Boleta de venta</p>
@@ -128,7 +149,8 @@ function BoletaThermal({ sale }: { sale: SaleFull }) {
   return (
     <div className="mx-auto bg-white p-3 text-black" style={{ width: "80mm", fontFamily: "monospace", fontSize: "11px" }}>
       <div className="text-center">
-        <p className="text-base font-bold">ServiCompu Yarango</p>
+        <p className="text-base font-bold">{BUSINESS.name}</p>
+        <p>RUC {BUSINESS.ruc}</p>
         <p>Venta y reparación</p>
         <p>================================</p>
         <p className="font-bold">BOLETA {sale.sale_number}</p>
