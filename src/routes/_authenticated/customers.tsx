@@ -6,8 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Pencil, Search, User } from "lucide-react";
+import { Plus, Pencil, Search, User, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { useAuth } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/_authenticated/customers")({
   head: () => ({ meta: [{ title: "Clientes — CompuERP" }, { name: "description", content: "Base de clientes." }] }),
@@ -18,6 +19,7 @@ type C = { id: string; document: string; full_name: string; phone: string | null
 const empty: Partial<C> = { document: "", full_name: "", phone: "", email: "", address: "" };
 
 function Customers() {
+  const { isAdmin } = useAuth();
   const [rows, setRows] = useState<C[]>([]);
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
@@ -41,6 +43,7 @@ function Customers() {
   };
 
   const showHistory = async (c: C) => {
+    void c;
     const { data } = await supabase.from("sales").select("id, sale_number, sale_date, total").eq("customer_id", c.id).order("sale_date", { ascending: false });
     setHistory({ open: true, name: c.full_name, rows: (data ?? []) as never });
   };
