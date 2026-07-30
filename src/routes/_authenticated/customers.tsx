@@ -6,8 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Pencil, Search, User } from "lucide-react";
+import { Plus, Pencil, Search, User, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { useAuth } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/_authenticated/customers")({
   head: () => ({ meta: [{ title: "Clientes — CompuERP" }, { name: "description", content: "Base de clientes." }] }),
@@ -18,6 +19,7 @@ type C = { id: string; document: string; full_name: string; phone: string | null
 const empty: Partial<C> = { document: "", full_name: "", phone: "", email: "", address: "" };
 
 function Customers() {
+  const { isAdmin } = useAuth();
   const [rows, setRows] = useState<C[]>([]);
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
@@ -43,6 +45,13 @@ function Customers() {
   const showHistory = async (c: C) => {
     const { data } = await supabase.from("sales").select("id, sale_number, sale_date, total").eq("customer_id", c.id).order("sale_date", { ascending: false });
     setHistory({ open: true, name: c.full_name, rows: (data ?? []) as never });
+  };
+
+  const removeCustomer = async (c: C) => {
+    if (!confirm(`¿Eliminar a ${c.full_name}? Sus ventas y garantías quedarán sin cliente asignado.`)) return;
+    const { error } = await supabase.from("customers").delete().eq("id", c.id);
+    if (error) return toast.error(error.message);
+    toast.success("Cliente eliminado"); load();
   };
 
   return (
@@ -83,6 +92,9 @@ function Customers() {
                 <TableCell className="text-right">
                   <Button size="sm" variant="ghost" onClick={() => showHistory(c)}><User className="mr-1 h-3 w-3" /> Historial</Button>
                   <Button size="icon" variant="ghost" onClick={() => { setEditing(c); setOpen(true); }}><Pencil className="h-4 w-4" /></Button>
+                  {isAdmin && (
+                    <Button size="icon" variant="ghost" className="text-destructive" onClick={() => removeCustomer(c)}><Trash2 className="h-4 w-4" /></Button>
+                  )}
                 </TableCell>
               </TableRow>
             ))}

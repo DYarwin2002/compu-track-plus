@@ -211,6 +211,20 @@ function Landing() {
             <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {filtered.map((p) => (
                 <article key={p.id} className="flex flex-col rounded-2xl border border-border bg-background p-5 transition-shadow hover:shadow-lg">
+                  <div className="mb-4 aspect-[4/3] w-full overflow-hidden rounded-xl border border-border bg-muted">
+                    {p.image_url ? (
+                      <img
+                        src={p.image_url}
+                        alt={`${p.name}${p.brand ? " " + p.brand : ""}`}
+                        loading="lazy"
+                        className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
+                      />
+                    ) : (
+                      <div className="grid h-full w-full place-items-center text-muted-foreground">
+                        <Monitor className="h-10 w-10 opacity-40" />
+                      </div>
+                    )}
+                  </div>
                   <div className="flex items-start justify-between gap-2">
                     <Badge variant="secondary" className="text-[10px] uppercase tracking-wide">{p.category}</Badge>
                     <Badge variant={p.condition === "nuevo" ? "default" : "outline"} className="text-[10px] capitalize">

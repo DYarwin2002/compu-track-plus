@@ -12,6 +12,8 @@ import { Plus, Pencil, Trash2, Search } from "lucide-react";
 import { toast } from "sonner";
 import { formatSoles } from "@/lib/format";
 import { useAuth } from "@/hooks/use-auth";
+import { MediaUpload } from "@/components/media-upload";
+import { signedMediaUrls } from "@/lib/media";
 
 export const Route = createFileRoute("/_authenticated/products")({
   head: () => ({ meta: [{ title: "Productos — ServiCompu Yarango" }, { name: "description", content: "Inventario de productos." }] }),
@@ -21,12 +23,13 @@ export const Route = createFileRoute("/_authenticated/products")({
 type Product = {
   id: string; sku: string; name: string; brand: string | null; model: string | null; serial_number: string | null;
   category: string; purchase_price: number; sale_price: number; stock: number; condition: string; default_warranty_months: number;
+  image_url: string | null;
 };
 
 const CATEGORIES = ["Laptop", "PC", "Monitor", "Impresora", "SSD", "RAM", "Accesorio", "Otro"];
 const CONDITIONS = ["Nuevo", "Usado", "Reacondicionado"];
 
-const empty: Partial<Product> = { sku: "", name: "", brand: "", model: "", serial_number: "", category: "Laptop", purchase_price: 0, sale_price: 0, stock: 1, condition: "Nuevo", default_warranty_months: 12 };
+const empty: Partial<Product> = { sku: "", name: "", brand: "", model: "", serial_number: "", category: "Laptop", purchase_price: 0, sale_price: 0, stock: 1, condition: "Nuevo", default_warranty_months: 12, image_url: null };
 
 function Products() {
   const { role, can } = useAuth();
@@ -36,12 +39,16 @@ function Products() {
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Partial<Product>>(empty);
+  const [thumbs, setThumbs] = useState<Record<string, string>>({});
 
   const load = async () => {
     let query = supabase.from("products").select("*").order("created_at", { ascending: false });
     if (q) query = query.or(`name.ilike.%${q}%,model.ilike.%${q}%,serial_number.ilike.%${q}%,sku.ilike.%${q}%`);
     const { data } = await query;
-    setRows((data ?? []) as Product[]);
+    const list = (data ?? []) as Product[];
+    setRows(list);
+    const paths = list.map((p) => p.image_url).filter((p): p is string => !!p);
+    setThumbs(paths.length ? await signedMediaUrls(paths) : {});
   };
   useEffect(() => { load(); }, [q]);
 
@@ -91,6 +98,11 @@ function Products() {
               <Field label="Precio de venta"><Input type="number" step="0.01" value={editing.sale_price ?? 0} onChange={(e) => setEditing({ ...editing, sale_price: parseFloat(e.target.value) })} /></Field>
               <Field label="Stock"><Input type="number" value={editing.stock ?? 0} onChange={(e) => setEditing({ ...editing, stock: parseInt(e.target.value) })} /></Field>
               <Field label="Garantía (meses)"><Input type="number" value={editing.default_warranty_months ?? 12} onChange={(e) => setEditing({ ...editing, default_warranty_months: parseInt(e.target.value) })} /></Field>
+              <div className="sm:col-span-2">
+                <Field label="Foto para el catálogo">
+                  <MediaUpload folder="products" value={editing.image_url} onChange={(p) => setEditing({ ...editing, image_url: p })} />
+                </Field>
+              </div>
             </div>
             <DialogFooter><Button onClick={save}>Guardar</Button></DialogFooter>
           </DialogContent>
@@ -106,7 +118,7 @@ function Products() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>SKU</TableHead><TableHead>Producto</TableHead><TableHead>Serie</TableHead>
+              <TableHead>Foto</TableHead><TableHead>SKU</TableHead><TableHead>Producto</TableHead><TableHead>Serie</TableHead>
               <TableHead>Categoría</TableHead><TableHead className="text-right">Precio</TableHead>
               <TableHead className="text-right">Stock</TableHead><TableHead>Estado</TableHead><TableHead></TableHead>
             </TableRow>
@@ -114,6 +126,13 @@ function Products() {
           <TableBody>
             {rows.map((p) => (
               <TableRow key={p.id}>
+                <TableCell>
+                  <div className="grid h-10 w-10 place-items-center overflow-hidden rounded-md border border-border bg-muted">
+                    {p.image_url && thumbs[p.image_url]
+                      ? <img src={thumbs[p.image_url]} alt={p.name} className="h-full w-full object-cover" />
+                      : <span className="text-[10px] text-muted-foreground">—</span>}
+                  </div>
+                </TableCell>
                 <TableCell className="font-mono text-xs">{p.sku}</TableCell>
                 <TableCell><div className="font-medium">{p.name}</div><div className="text-xs text-muted-foreground">{p.brand} {p.model}</div></TableCell>
                 <TableCell className="font-mono text-xs">{p.serial_number ?? "—"}</TableCell>
@@ -127,7 +146,7 @@ function Products() {
                 </TableCell>
               </TableRow>
             ))}
-            {rows.length === 0 && <TableRow><TableCell colSpan={8} className="py-8 text-center text-muted-foreground">Sin productos</TableCell></TableRow>}
+            {rows.length === 0 && <TableRow><TableCell colSpan={9} className="py-8 text-center text-muted-foreground">Sin productos</TableCell></TableRow>}
           </TableBody>
         </Table>
       </div>

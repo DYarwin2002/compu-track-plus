@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { LayoutDashboard, Package, Users, ShoppingCart, ShieldCheck, BarChart3, Search, LogOut, Cpu, UserCog, ScrollText, Wrench, Shield } from "lucide-react";
+import { LayoutDashboard, Package, Users, ShoppingCart, ShieldCheck, BarChart3, Search, LogOut, Cpu, UserCog, ScrollText, Wrench, Shield, Truck } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -25,6 +25,7 @@ const items: NavItem[] = [
   { title: "Nueva venta", url: "/sales/new", icon: ShoppingCart, permission: "sales.create" },
   { title: "Ventas", url: "/sales", icon: ShoppingCart, permission: "sales.view" },
   { title: "Productos", url: "/products", icon: Package, permission: "products.view" },
+  { title: "Compras", url: "/purchases", icon: Truck, adminOnly: true },
   { title: "Clientes", url: "/customers", icon: Users, permission: "customers.view" },
   { title: "Garantías", url: "/warranties", icon: ShieldCheck, permission: "warranties.view" },
   { title: "Servicio técnico", url: "/repairs", icon: Wrench, permission: "repairs.view" },

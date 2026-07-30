@@ -94,6 +94,7 @@ export type Database = {
           created_at: string
           default_warranty_months: number
           id: string
+          image_url: string | null
           model: string | null
           name: string
           purchase_price: number
@@ -110,6 +111,7 @@ export type Database = {
           created_at?: string
           default_warranty_months?: number
           id?: string
+          image_url?: string | null
           model?: string | null
           name: string
           purchase_price?: number
@@ -126,6 +128,7 @@ export type Database = {
           created_at?: string
           default_warranty_months?: number
           id?: string
+          image_url?: string | null
           model?: string | null
           name?: string
           purchase_price?: number
@@ -158,6 +161,60 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id?: string
+        }
+        Relationships: []
+      }
+      purchases: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          doc_number: string
+          doc_type: string
+          id: string
+          igv: number
+          image_url: string | null
+          notes: string | null
+          payment_method: string
+          purchase_date: string
+          subtotal: number
+          supplier_name: string
+          supplier_ruc: string | null
+          total: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          doc_number: string
+          doc_type?: string
+          id?: string
+          igv?: number
+          image_url?: string | null
+          notes?: string | null
+          payment_method?: string
+          purchase_date?: string
+          subtotal?: number
+          supplier_name: string
+          supplier_ruc?: string | null
+          total?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          doc_number?: string
+          doc_type?: string
+          id?: string
+          igv?: number
+          image_url?: string | null
+          notes?: string | null
+          payment_method?: string
+          purchase_date?: string
+          subtotal?: number
+          supplier_name?: string
+          supplier_ruc?: string | null
+          total?: number
+          updated_at?: string
         }
         Relationships: []
       }

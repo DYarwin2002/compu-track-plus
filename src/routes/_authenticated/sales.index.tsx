@@ -4,9 +4,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { Plus, Search, Printer } from "lucide-react";
+import { Plus, Search, Printer, Trash2 } from "lucide-react";
 import { formatSoles, formatDateTime } from "@/lib/format";
 import { Badge } from "@/components/ui/badge";
+import { useAuth } from "@/hooks/use-auth";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/sales/")({
   head: () => ({ meta: [{ title: "Ventas — CompuERP" }, { name: "description", content: "Historial de ventas." }] }),
@@ -16,17 +18,25 @@ export const Route = createFileRoute("/_authenticated/sales/")({
 type S = { id: string; sale_number: string; sale_date: string; total: number; payment_method: string; customers: { full_name: string } | null };
 
 function SalesList() {
+  const { isAdmin } = useAuth();
   const [rows, setRows] = useState<S[]>([]);
   const [q, setQ] = useState("");
 
-  useEffect(() => {
-    (async () => {
-      let query = supabase.from("sales").select("id, sale_number, sale_date, total, payment_method, customers(full_name)").order("sale_date", { ascending: false }).limit(200);
-      if (q) query = query.ilike("sale_number", `%${q.toUpperCase()}%`);
-      const { data } = await query;
-      setRows((data ?? []) as never);
-    })();
-  }, [q]);
+  const load = async () => {
+    let query = supabase.from("sales").select("id, sale_number, sale_date, total, payment_method, customers(full_name)").order("sale_date", { ascending: false }).limit(200);
+    if (q) query = query.ilike("sale_number", `%${q.toUpperCase()}%`);
+    const { data } = await query;
+    setRows((data ?? []) as never);
+  };
+  useEffect(() => { load(); }, [q]);
+
+  const removeSale = async (s: S) => {
+    if (!confirm(`¿Eliminar la venta ${s.sale_number}? Se borrarán sus productos y garantías asociadas.`)) return;
+    const { error } = await supabase.from("sales").delete().eq("id", s.id);
+    if (error) return toast.error(error.message);
+    toast.success("Venta eliminada");
+    load();
+  };
 
   return (
     <div className="space-y-4">
@@ -51,6 +61,11 @@ function SalesList() {
                 <TableCell className="text-right font-bold">{formatSoles(s.total)}</TableCell>
                 <TableCell className="text-right">
                   <Button asChild size="sm" variant="ghost"><Link to="/sales/$id" params={{ id: s.id }}><Printer className="mr-1 h-3 w-3" /> Ver / Imprimir</Link></Button>
+                  {isAdmin && (
+                    <Button size="icon" variant="ghost" className="text-destructive" onClick={() => removeSale(s)}>
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  )}
                 </TableCell>
               </TableRow>
             ))}

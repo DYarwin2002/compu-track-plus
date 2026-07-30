@@ -1,5 +1,6 @@
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
+import { BUSINESS } from "./business";
 
 export type BoletaData = {
   sale_number: string;
@@ -33,10 +34,10 @@ export function generateBoletaPDF(data: BoletaData): jsPDF {
   doc.setTextColor(255, 255, 255);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(18);
-  doc.text("ServiCompu Yarango", 14, 12);
+  doc.text(BUSINESS.name, 14, 12);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
-  doc.text("Venta y reparacion de computadoras", 14, 18);
+  doc.text(`RUC ${BUSINESS.ruc} · Venta y reparacion de computadoras`, 14, 18);
   doc.text("Portal de clientes: /consultar", 14, 23);
 
   doc.setTextColor(255, 255, 255);
