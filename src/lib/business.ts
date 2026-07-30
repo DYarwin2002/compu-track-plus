@@ -1,0 +1,8 @@
+export const BUSINESS = {
+  name: "ServiCompu Yarango",
+  ruc: "10766806363",
+  tagline: "Venta y reparación de computadoras",
+  address: "Yarango, Perú",
+  phone: "Atención por WhatsApp",
+  portal: "/consultar",
+} as const;
