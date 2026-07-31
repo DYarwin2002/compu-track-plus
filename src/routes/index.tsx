@@ -8,6 +8,8 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { getPublicCatalog } from "@/lib/public-catalog.functions";
 import { formatSoles } from "@/lib/format";
+import { LoginDialog } from "@/components/login-dialog";
+import heroTienda from "@/assets/hero-tienda.jpg";
 import {
   Monitor, ShieldCheck, Zap, Search, Wrench, Truck, CreditCard, Cpu,
   Sparkles, LayoutGrid, Phone, MapPin, Clock,
@@ -71,12 +73,30 @@ function Landing() {
                 <span className="ml-1 font-bold sm:hidden">Portal</span>
               </Link>
             </Button>
-            <Button asChild size="sm" variant="outline">
-              <Link to={session ? "/dashboard" : "/auth"}>{session ? "Mi panel" : "Ingresar"}</Link>
-            </Button>
+            {session ? (
+              <Button asChild size="sm" variant="outline">
+                <Link to="/dashboard">Mi panel</Link>
+              </Button>
+            ) : (
+              <LoginDialog>
+                <Button size="sm" variant="outline">Ingresar</Button>
+              </LoginDialog>
+            )}
           </div>
         </div>
       </header>
+
+      {/* Foto de portada */}
+      <section className="relative h-[25vh] min-h-[180px] w-full overflow-hidden border-b border-border">
+        <img
+          src={heroTienda}
+          alt="Tienda ServiCompu Yarango: venta, reparación y garantía de computadoras"
+          width={1920}
+          height={720}
+          className="h-full w-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-background/85 via-background/25 to-transparent" />
+      </section>
 
       {/* Hero / publicidad */}
       <section className="border-b border-border bg-card/40">
