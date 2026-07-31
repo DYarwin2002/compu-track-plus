@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/sidebar";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "./ui/button";
+import logoServi from "@/assets/logo-servicompu.jpg.asset.json";
 
 import type { Permission } from "@/lib/permissions";
 
