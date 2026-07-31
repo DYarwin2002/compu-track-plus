@@ -10,9 +10,14 @@ import { getPublicCatalog } from "@/lib/public-catalog.functions";
 import { formatSoles } from "@/lib/format";
 import { LoginDialog } from "@/components/login-dialog";
 import heroTienda from "@/assets/hero-tienda.jpg";
+import logoServi from "@/assets/logo-servicompu.jpg.asset.json";
+import { BUSINESS } from "@/lib/business";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
+} from "@/components/ui/dialog";
 import {
   Monitor, ShieldCheck, Zap, Search, Wrench, Truck, CreditCard, Cpu,
-  Sparkles, LayoutGrid, Phone, MapPin, Clock,
+  Sparkles, LayoutGrid, Phone, MapPin, Clock, MessageCircle, Package,
 } from "lucide-react";
 
 export const Route = createFileRoute("/")({
@@ -39,6 +44,10 @@ function Landing() {
 
   const [cat, setCat] = useState<string>("Todos");
   const [q, setQ] = useState("");
+  const [selected, setSelected] = useState<(typeof products)[number] | null>(null);
+
+  const waLink = (text: string) =>
+    `https://wa.me/${BUSINESS.whatsapp}?text=${encodeURIComponent(text)}`;
 
   const categories = useMemo(
     () => ["Todos", ...Array.from(new Set(products.map((p) => p.category))).sort()],
@@ -59,11 +68,13 @@ function Landing() {
       {/* Header */}
       <header className="sticky top-0 z-30 border-b border-border bg-background/85 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
-          <Link to="/" className="flex items-center gap-2">
-            <div className="grid h-9 w-9 place-items-center rounded-lg" style={{ background: "var(--gradient-primary)" }}>
-              <Monitor className="h-5 w-5 text-primary-foreground" />
-            </div>
-            <span className="text-base font-black tracking-tight sm:text-lg">ServiCompu Yarango</span>
+          <Link to="/" className="flex min-w-0 items-center gap-2">
+            <img
+              src={logoServi.url}
+              alt="Logo ServiCompu Yarango"
+              className="h-10 w-10 shrink-0 rounded-xl bg-white object-contain p-0.5 shadow-sm"
+            />
+            <span className="truncate text-base font-black tracking-tight sm:text-lg">ServiCompu Yarango</span>
           </Link>
           <div className="flex items-center gap-2">
             <Button asChild size="sm" className="shadow" style={{ background: "var(--gradient-primary)" }}>
@@ -87,15 +98,38 @@ function Landing() {
       </header>
 
       {/* Foto de portada */}
-      <section className="relative h-[25vh] min-h-[180px] w-full overflow-hidden border-b border-border">
-        <img
-          src={heroTienda}
-          alt="Tienda ServiCompu Yarango: venta, reparación y garantía de computadoras"
-          width={1920}
-          height={720}
-          className="h-full w-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-background/85 via-background/25 to-transparent" />
+      <section className="relative w-full overflow-hidden border-b border-border">
+        <div className="relative aspect-[16/10] w-full sm:aspect-[21/9] lg:aspect-[24/7]">
+          <img
+            src={heroTienda}
+            alt="Tienda ServiCompu Yarango: venta, reparación y garantía de computadoras"
+            width={1920}
+            height={848}
+            className="absolute inset-0 h-full w-full object-cover object-center"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-background/90 via-background/45 to-background/10" />
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/10 to-transparent" />
+          <div className="absolute inset-0">
+            <div className="mx-auto flex h-full max-w-6xl items-center px-4 sm:px-6">
+              <div className="flex min-w-0 items-center gap-3 sm:gap-5">
+                <img
+                  src={logoServi.url}
+                  alt=""
+                  aria-hidden
+                  className="h-16 w-16 shrink-0 rounded-2xl bg-white object-contain p-1 shadow-lg sm:h-24 sm:w-24"
+                />
+                <div className="min-w-0">
+                  <p className="text-2xl font-black leading-tight tracking-tight sm:text-4xl lg:text-5xl">
+                    ServiCompu <span className="text-primary">Yarango</span>
+                  </p>
+                  <p className="mt-1 text-xs text-muted-foreground sm:text-base">
+                    Venta · Reparación · Garantía
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </section>
 
       {/* Hero / publicidad */}
@@ -230,7 +264,11 @@ function Landing() {
           ) : (
             <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {filtered.map((p) => (
-                <article key={p.id} className="flex flex-col rounded-2xl border border-border bg-background p-5 transition-shadow hover:shadow-lg">
+                <article
+                  key={p.id}
+                  onClick={() => setSelected(p)}
+                  className="flex cursor-pointer flex-col rounded-2xl border border-border bg-background p-5 transition-all hover:-translate-y-0.5 hover:shadow-lg"
+                >
                   <div className="mb-4 aspect-[4/3] w-full overflow-hidden rounded-xl border border-border bg-muted">
                     {p.image_url ? (
                       <img
@@ -266,12 +304,63 @@ function Landing() {
                       {p.stock} en stock
                     </span>
                   </div>
+                  <span className="mt-3 text-[11px] font-semibold text-primary">Ver detalle →</span>
                 </article>
               ))}
             </div>
           )}
         </div>
       </section>
+
+      {/* Detalle de producto */}
+      <Dialog open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>
+        <DialogContent className="max-w-lg">
+          {selected && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="text-left text-lg font-black">{selected.name}</DialogTitle>
+                <DialogDescription className="text-left">
+                  {[selected.brand, selected.model].filter(Boolean).join(" · ") || selected.category}
+                </DialogDescription>
+              </DialogHeader>
+              <div className="aspect-[4/3] w-full overflow-hidden rounded-xl border border-border bg-muted">
+                {selected.image_url ? (
+                  <img src={selected.image_url} alt={selected.name} className="h-full w-full object-cover" />
+                ) : (
+                  <div className="grid h-full w-full place-items-center text-muted-foreground">
+                    <Package className="h-10 w-10 opacity-40" />
+                  </div>
+                )}
+              </div>
+              <div className="grid grid-cols-3 gap-2 text-center">
+                <div className="rounded-xl border border-border p-2">
+                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Precio</p>
+                  <p className="mt-1 text-sm font-black text-primary">{formatSoles(selected.sale_price)}</p>
+                </div>
+                <div className="rounded-xl border border-border p-2">
+                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Garantía</p>
+                  <p className="mt-1 text-sm font-bold">{selected.default_warranty_months} meses</p>
+                </div>
+                <div className="rounded-xl border border-border p-2">
+                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Stock</p>
+                  <p className="mt-1 text-sm font-bold">{selected.stock}</p>
+                </div>
+              </div>
+              <Button asChild size="lg" className="w-full font-bold" style={{ background: "var(--gradient-primary)" }}>
+                <a
+                  href={waLink(
+                    `Hola ${BUSINESS.name}, quiero consultar por: ${selected.name} (${formatSoles(selected.sale_price)}).`,
+                  )}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <MessageCircle className="mr-2 h-4 w-4" /> Consultar por WhatsApp
+                </a>
+              </Button>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* CTA final */}
       <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
@@ -303,6 +392,18 @@ function Landing() {
           </div>
         </div>
       </footer>
+
+      {/* WhatsApp flotante */}
+      <a
+        href={waLink(`Hola ${BUSINESS.name}, necesito información.`)}
+        target="_blank"
+        rel="noreferrer"
+        aria-label="Escríbenos por WhatsApp"
+        className="fixed bottom-5 right-5 z-40 flex h-14 w-14 items-center justify-center rounded-full text-primary-foreground shadow-xl transition-transform hover:scale-105"
+        style={{ background: "var(--gradient-primary)" }}
+      >
+        <MessageCircle className="h-6 w-6" />
+      </a>
     </div>
   );
 }
