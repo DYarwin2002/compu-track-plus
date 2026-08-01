@@ -1,19 +1,19 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
+import { Button } from "@/frontend/components/ui/button";
+import { Input } from "@/frontend/components/ui/input";
+import { Label } from "@/frontend/components/ui/label";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/frontend/components/ui/dialog";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/frontend/components/ui/table";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/frontend/components/ui/select";
+import { Badge } from "@/frontend/components/ui/badge";
 import { Plus, Pencil, Trash2, Search } from "lucide-react";
 import { toast } from "sonner";
-import { formatSoles } from "@/lib/format";
-import { useAuth } from "@/hooks/use-auth";
-import { MediaUpload } from "@/components/media-upload";
-import { signedMediaUrls } from "@/lib/media";
+import { formatSoles } from "@/frontend/lib/format";
+import { useAuth } from "@/frontend/hooks/use-auth";
+import { MediaUpload } from "@/frontend/components/media-upload";
+import { signedMediaUrls } from "@/frontend/lib/media";
 
 export const Route = createFileRoute("/_authenticated/products")({
   head: () => ({ meta: [{ title: "Productos — ServiCompu Yarango" }, { name: "description", content: "Inventario de productos." }] }),

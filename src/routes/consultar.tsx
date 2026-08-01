@@ -1,21 +1,21 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { lookupWarranty, type PublicWarranty } from "@/lib/warranty-lookup.functions";
+import { lookupWarranty, type PublicWarranty } from "@/backend/functions/warranty-lookup.functions";
 import {
   lookupSaleByNumber, lookupSalesByDocument, getPublicSalePdfData,
   getPublicCustomerHistory,
   type PublicSaleSummary,
   type PublicCustomerHistory,
-} from "@/lib/public-sales.functions";
-import { downloadBoletaPDF } from "@/lib/boleta-pdf";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+} from "@/backend/functions/public-sales.functions";
+import { downloadBoletaPDF } from "@/frontend/lib/boleta-pdf";
+import { Button } from "@/frontend/components/ui/button";
+import { Input } from "@/frontend/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/frontend/components/ui/card";
+import { Badge } from "@/frontend/components/ui/badge";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/frontend/components/ui/tabs";
 import { Search, Cpu, ShieldCheck, ShieldAlert, ShieldX, Download, FileText, Wrench, Receipt } from "lucide-react";
-import { computeWarrantyStatus, daysUntil, formatDate, formatSoles } from "@/lib/format";
+import { computeWarrantyStatus, daysUntil, formatDate, formatSoles } from "@/frontend/lib/format";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/consultar")({

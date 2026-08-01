@@ -2,19 +2,19 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useAuth } from "@/hooks/use-auth";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { getPublicCatalog } from "@/lib/public-catalog.functions";
-import { formatSoles } from "@/lib/format";
-import { LoginDialog } from "@/components/login-dialog";
+import { useAuth } from "@/frontend/hooks/use-auth";
+import { Button } from "@/frontend/components/ui/button";
+import { Badge } from "@/frontend/components/ui/badge";
+import { Input } from "@/frontend/components/ui/input";
+import { getPublicCatalog } from "@/backend/functions/public-catalog.functions";
+import { formatSoles } from "@/frontend/lib/format";
+import { LoginDialog } from "@/frontend/components/login-dialog";
 import heroTienda from "@/assets/hero-tienda.jpg";
 import logoServi from "@/assets/logo-servicompu.jpg.asset.json";
-import { BUSINESS } from "@/lib/business";
+import { BUSINESS } from "@/frontend/lib/business";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
-} from "@/components/ui/dialog";
+} from "@/frontend/components/ui/dialog";
 import {
   Monitor, ShieldCheck, Zap, Search, Wrench, Truck, CreditCard, Cpu,
   Sparkles, LayoutGrid, Phone, MapPin, Clock, MessageCircle, Package,

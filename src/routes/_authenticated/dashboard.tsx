@@ -1,14 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/frontend/components/ui/card";
+import { Badge } from "@/frontend/components/ui/badge";
 import {
   Package, ShieldCheck, ShieldAlert, ShieldX, ShoppingCart, TrendingUp,
   Wrench, ArrowUpRight, ArrowDownRight, Search, Users, PlusCircle, ArrowRight,
 } from "lucide-react";
-import { formatSoles, formatDate } from "@/lib/format";
-import { useAuth } from "@/hooks/use-auth";
+import { formatSoles, formatDate } from "@/frontend/lib/format";
+import { useAuth } from "@/frontend/hooks/use-auth";
 import { AreaChart, Area, ResponsiveContainer, Tooltip } from "recharts";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({

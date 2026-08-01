@@ -1,13 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Input } from "@/components/ui/input";
+import { Button } from "@/frontend/components/ui/button";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/frontend/components/ui/table";
+import { Input } from "@/frontend/components/ui/input";
 import { Plus, Search, Printer, Trash2 } from "lucide-react";
-import { formatSoles, formatDateTime } from "@/lib/format";
-import { Badge } from "@/components/ui/badge";
-import { useAuth } from "@/hooks/use-auth";
+import { formatSoles, formatDateTime } from "@/frontend/lib/format";
+import { Badge } from "@/frontend/components/ui/badge";
+import { useAuth } from "@/frontend/hooks/use-auth";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/sales/")({

@@ -1,8 +1,8 @@
 import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { useAuth } from "@/hooks/use-auth";
-import { AppSidebar } from "@/components/app-sidebar";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { useAuth } from "@/frontend/hooks/use-auth";
+import { AppSidebar } from "@/frontend/components/app-sidebar";
+import { SidebarProvider, SidebarTrigger } from "@/frontend/components/ui/sidebar";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,

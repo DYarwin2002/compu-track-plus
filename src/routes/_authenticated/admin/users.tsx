@@ -7,25 +7,25 @@ import {
   updateSellerRole,
   setSellerActive,
   resetSellerPassword,
-} from "@/lib/admin-users.functions";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+} from "@/backend/functions/admin-users.functions";
+import { Button } from "@/frontend/components/ui/button";
+import { Input } from "@/frontend/components/ui/input";
+import { Label } from "@/frontend/components/ui/label";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+} from "@/frontend/components/ui/table";
+import { Badge } from "@/frontend/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/frontend/components/ui/card";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/components/ui/select";
+} from "@/frontend/components/ui/select";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger,
-} from "@/components/ui/dialog";
+} from "@/frontend/components/ui/dialog";
 import { toast } from "sonner";
 import { UserPlus, KeyRound } from "lucide-react";
-import { useAuth } from "@/hooks/use-auth";
-import { formatDate } from "@/lib/format";
+import { useAuth } from "@/frontend/hooks/use-auth";
+import { formatDate } from "@/frontend/lib/format";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/admin/users")({
