@@ -23,6 +23,8 @@ import { Route as AuthenticatedDashboardRouteImport } from './routes/_authentica
 import { Route as AuthenticatedCustomersRouteImport } from './routes/_authenticated/customers'
 import { Route as AuthenticatedAdminRouteRouteImport } from './routes/_authenticated/admin/route'
 import { Route as AuthenticatedSalesIndexRouteImport } from './routes/_authenticated/sales.index'
+import { Route as ApiPublicWarrantiesRouteImport } from './routes/api/public/warranties'
+import { Route as ApiPublicCatalogRouteImport } from './routes/api/public/catalog'
 import { Route as AuthenticatedSalesNewRouteImport } from './routes/_authenticated/sales.new'
 import { Route as AuthenticatedSalesIdRouteImport } from './routes/_authenticated/sales.$id'
 import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin/users'
@@ -98,6 +100,16 @@ const AuthenticatedSalesIndexRoute = AuthenticatedSalesIndexRouteImport.update({
   path: '/sales/',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const ApiPublicWarrantiesRoute = ApiPublicWarrantiesRouteImport.update({
+  id: '/api/public/warranties',
+  path: '/api/public/warranties',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicCatalogRoute = ApiPublicCatalogRouteImport.update({
+  id: '/api/public/catalog',
+  path: '/api/public/catalog',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedSalesNewRoute = AuthenticatedSalesNewRouteImport.update({
   id: '/sales/new',
   path: '/sales/new',
@@ -142,6 +154,8 @@ export interface FileRoutesByFullPath {
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/sales/$id': typeof AuthenticatedSalesIdRoute
   '/sales/new': typeof AuthenticatedSalesNewRoute
+  '/api/public/catalog': typeof ApiPublicCatalogRoute
+  '/api/public/warranties': typeof ApiPublicWarrantiesRoute
   '/sales/': typeof AuthenticatedSalesIndexRoute
 }
 export interface FileRoutesByTo {
@@ -162,6 +176,8 @@ export interface FileRoutesByTo {
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/sales/$id': typeof AuthenticatedSalesIdRoute
   '/sales/new': typeof AuthenticatedSalesNewRoute
+  '/api/public/catalog': typeof ApiPublicCatalogRoute
+  '/api/public/warranties': typeof ApiPublicWarrantiesRoute
   '/sales': typeof AuthenticatedSalesIndexRoute
 }
 export interface FileRoutesById {
@@ -184,6 +200,8 @@ export interface FileRoutesById {
   '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
   '/_authenticated/sales/$id': typeof AuthenticatedSalesIdRoute
   '/_authenticated/sales/new': typeof AuthenticatedSalesNewRoute
+  '/api/public/catalog': typeof ApiPublicCatalogRoute
+  '/api/public/warranties': typeof ApiPublicWarrantiesRoute
   '/_authenticated/sales/': typeof AuthenticatedSalesIndexRoute
 }
 export interface FileRouteTypes {
@@ -206,6 +224,8 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/sales/$id'
     | '/sales/new'
+    | '/api/public/catalog'
+    | '/api/public/warranties'
     | '/sales/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -226,6 +246,8 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/sales/$id'
     | '/sales/new'
+    | '/api/public/catalog'
+    | '/api/public/warranties'
     | '/sales'
   id:
     | '__root__'
@@ -247,6 +269,8 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/users'
     | '/_authenticated/sales/$id'
     | '/_authenticated/sales/new'
+    | '/api/public/catalog'
+    | '/api/public/warranties'
     | '/_authenticated/sales/'
   fileRoutesById: FileRoutesById
 }
@@ -256,6 +280,8 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   ConsultarRoute: typeof ConsultarRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  ApiPublicCatalogRoute: typeof ApiPublicCatalogRoute
+  ApiPublicWarrantiesRoute: typeof ApiPublicWarrantiesRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -358,6 +384,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSalesIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/warranties': {
+      id: '/api/public/warranties'
+      path: '/api/public/warranties'
+      fullPath: '/api/public/warranties'
+      preLoaderRoute: typeof ApiPublicWarrantiesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/catalog': {
+      id: '/api/public/catalog'
+      path: '/api/public/catalog'
+      fullPath: '/api/public/catalog'
+      preLoaderRoute: typeof ApiPublicCatalogRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/sales/new': {
       id: '/_authenticated/sales/new'
       path: '/sales/new'
@@ -451,6 +491,8 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   ConsultarRoute: ConsultarRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  ApiPublicCatalogRoute: ApiPublicCatalogRoute,
+  ApiPublicWarrantiesRoute: ApiPublicWarrantiesRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
