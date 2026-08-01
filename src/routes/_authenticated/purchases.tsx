@@ -1,19 +1,19 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Button } from "@/frontend/components/ui/button";
+import { Input } from "@/frontend/components/ui/input";
+import { Label } from "@/frontend/components/ui/label";
+import { Textarea } from "@/frontend/components/ui/textarea";
+import { Badge } from "@/frontend/components/ui/badge";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/frontend/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/frontend/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/frontend/components/ui/table";
 import { Plus, Pencil, Trash2, Search, FileImage, Truck } from "lucide-react";
 import { toast } from "sonner";
-import { formatSoles, formatDate, IGV_RATE } from "@/lib/format";
-import { MediaUpload } from "@/components/media-upload";
-import { signedMediaUrl } from "@/lib/media";
+import { formatSoles, formatDate, IGV_RATE } from "@/frontend/lib/format";
+import { MediaUpload } from "@/frontend/components/media-upload";
+import { signedMediaUrl } from "@/frontend/lib/media";
 
 export const Route = createFileRoute("/_authenticated/purchases")({
   head: () => ({

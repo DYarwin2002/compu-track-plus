@@ -1,11 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/frontend/components/ui/card";
+import { Button } from "@/frontend/components/ui/button";
 import { Download, TrendingUp, Package, ShieldCheck } from "lucide-react";
-import { formatSoles, formatDate } from "@/lib/format";
-import { useAuth } from "@/hooks/use-auth";
+import { formatSoles, formatDate } from "@/frontend/lib/format";
+import { useAuth } from "@/frontend/hooks/use-auth";
 
 export const Route = createFileRoute("/_authenticated/reports")({
   head: () => ({ meta: [{ title: "Reportes — ServiCompu Yarango" }, { name: "description", content: "Reportes de ventas y garantías." }] }),

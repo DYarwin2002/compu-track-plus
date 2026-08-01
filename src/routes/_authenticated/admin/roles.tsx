@@ -1,17 +1,17 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { Button } from "@/frontend/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/frontend/components/ui/card";
+import { Checkbox } from "@/frontend/components/ui/checkbox";
+import { Badge } from "@/frontend/components/ui/badge";
+import { Input } from "@/frontend/components/ui/input";
+import { Label } from "@/frontend/components/ui/label";
+import { Textarea } from "@/frontend/components/ui/textarea";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/frontend/components/ui/dialog";
 import { toast } from "sonner";
 import { Shield, Save, Loader2, Plus, Trash2, Lock } from "lucide-react";
-import { ALL_PERMISSIONS, PERMISSION_GROUPS, type Permission } from "@/lib/permissions";
+import { ALL_PERMISSIONS, PERMISSION_GROUPS, type Permission } from "@/frontend/lib/permissions";
 
 export const Route = createFileRoute("/_authenticated/admin/roles")({
   head: () => ({

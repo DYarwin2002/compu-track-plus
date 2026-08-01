@@ -1,6 +1,6 @@
 import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuth } from "@/frontend/hooks/use-auth";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   component: AdminGate,

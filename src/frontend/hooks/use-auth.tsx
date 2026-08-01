@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from "
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import type { Permission } from "@/lib/permissions";
+import type { Permission } from "@/frontend/lib/permissions";
 
 type Role = string | null;
 

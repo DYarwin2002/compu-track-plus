@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/frontend/components/ui/button";
 import { ImagePlus, Loader2, X } from "lucide-react";
 import { toast } from "sonner";
-import { uploadMedia, signedMediaUrl, removeMedia } from "@/lib/media";
+import { uploadMedia, signedMediaUrl, removeMedia } from "@/frontend/lib/media";
 
 export function MediaUpload({
   value,

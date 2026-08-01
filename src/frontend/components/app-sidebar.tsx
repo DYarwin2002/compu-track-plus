@@ -12,12 +12,12 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from "@/components/ui/sidebar";
-import { useAuth } from "@/hooks/use-auth";
+} from "@/frontend/components/ui/sidebar";
+import { useAuth } from "@/frontend/hooks/use-auth";
 import { Button } from "./ui/button";
 import logoServi from "@/assets/logo-servicompu.jpg.asset.json";
 
-import type { Permission } from "@/lib/permissions";
+import type { Permission } from "@/frontend/lib/permissions";
 
 type NavItem = { title: string; url: string; icon: typeof LayoutDashboard; adminOnly?: boolean; permission?: Permission };
 
