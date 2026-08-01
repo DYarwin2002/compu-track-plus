@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useParams, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/database/client";
 import { Button } from "@/frontend/components/ui/button";
 import { Card } from "@/frontend/components/ui/card";
 import { Printer, ArrowLeft, Download, Trash2 } from "lucide-react";

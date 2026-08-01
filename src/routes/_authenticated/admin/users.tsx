@@ -26,7 +26,7 @@ import { toast } from "sonner";
 import { UserPlus, KeyRound } from "lucide-react";
 import { useAuth } from "@/frontend/hooks/use-auth";
 import { formatDate } from "@/frontend/lib/format";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/database/client";
 
 export const Route = createFileRoute("/_authenticated/admin/users")({
   head: () => ({
