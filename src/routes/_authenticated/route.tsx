@@ -9,10 +9,10 @@ export const Route = createFileRoute("/_authenticated")({
   ssr: false,
   // Guardia real: corre antes de renderizar en cada navegación (URL directa,
   // atrás/adelante o enlace). Sin sesión válida no se monta nada.
-  beforeLoad: async ({ location }) => {
+  beforeLoad: async () => {
     const { data } = await supabase.auth.getUser();
     if (!data.user) {
-      throw redirect({ to: "/auth", search: { redirect: location.href }, replace: true });
+      throw redirect({ to: "/auth", replace: true });
     }
   },
   component: Layout,
