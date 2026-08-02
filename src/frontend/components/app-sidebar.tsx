@@ -1,4 +1,6 @@
 import { Link, useRouterState } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
 import { LayoutDashboard, Package, Users, ShoppingCart, ShieldCheck, BarChart3, Search, LogOut, UserCog, ScrollText, Wrench, Shield, Truck } from "lucide-react";
 import {
   Sidebar,
@@ -41,6 +43,15 @@ export function AppSidebar() {
   const collapsed = state === "collapsed";
   const pathname = useRouterState({ select: (r) => r.location.pathname });
   const { user, role, isAdmin, can, signOut } = useAuth();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  const handleSignOut = async () => {
+    await queryClient.cancelQueries();
+    queryClient.clear();
+    await signOut();
+    navigate({ to: "/auth", replace: true });
+  };
   const visible = items.filter((i) => {
     if (i.adminOnly) return isAdmin;
     if (i.permission) return can(i.permission);
@@ -105,7 +116,7 @@ export function AppSidebar() {
               <p className="text-[10px] uppercase tracking-wide text-muted-foreground">{role ?? "…"}</p>
             </div>
           )}
-          <Button size="icon" variant="ghost" onClick={() => signOut()} title="Cerrar sesión">
+          <Button size="icon" variant="ghost" onClick={() => void handleSignOut()} title="Cerrar sesión">
             <LogOut className="h-4 w-4" />
           </Button>
         </div>
