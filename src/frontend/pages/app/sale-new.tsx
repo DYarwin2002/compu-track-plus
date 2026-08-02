@@ -46,7 +46,7 @@ function NewSale() {
     setItems((x) => [...x, {
       key: crypto.randomUUID(), product_id: p.id, product_name: p.name,
       serial_number: p.serial_number ?? "", quantity: 1, unit_price: Number(p.sale_price),
-      warranty_months: p.default_warranty_months,
+      warranty_months: 12, // Garantía fija de 1 año desde la fecha de venta
     }]);
     setOpenProduct(false);
   };
@@ -131,12 +131,7 @@ function NewSale() {
                     <TableCell><Input value={i.serial_number} onChange={(e) => updateItem(i.key, { serial_number: e.target.value })} placeholder="N° serie" className="h-8 w-32 font-mono text-xs" /></TableCell>
                     <TableCell><Input type="number" min={1} value={i.quantity} onChange={(e) => updateItem(i.key, { quantity: parseInt(e.target.value) || 1 })} className="h-8 w-16" /></TableCell>
                     <TableCell><Input type="number" step="0.01" value={i.unit_price} onChange={(e) => updateItem(i.key, { unit_price: parseFloat(e.target.value) || 0 })} className="h-8 w-24" /></TableCell>
-                    <TableCell>
-                      <Select value={String(i.warranty_months)} onValueChange={(v) => updateItem(i.key, { warranty_months: parseInt(v) })}>
-                        <SelectTrigger className="h-8 w-24"><SelectValue /></SelectTrigger>
-                        <SelectContent>{[3, 6, 12, 24, 36].map((m) => <SelectItem key={m} value={String(m)}>{m} m</SelectItem>)}</SelectContent>
-                      </Select>
-                    </TableCell>
+                    <TableCell className="whitespace-nowrap text-sm text-muted-foreground">1 año</TableCell>
                     <TableCell className="text-right font-bold">{formatSoles(i.quantity * i.unit_price)}</TableCell>
                     <TableCell><Button size="icon" variant="ghost" onClick={() => removeItem(i.key)}><Trash2 className="h-4 w-4" /></Button></TableCell>
                   </TableRow>
