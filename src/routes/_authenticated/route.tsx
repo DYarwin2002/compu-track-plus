@@ -1,11 +1,20 @@
-import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Outlet, redirect, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
+import { supabase } from "@/database/client";
 import { useAuth } from "@/frontend/hooks/use-auth";
 import { AppSidebar } from "@/frontend/components/app-sidebar";
 import { SidebarProvider, SidebarTrigger } from "@/frontend/components/ui/sidebar";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
+  // Guardia real: corre antes de renderizar en cada navegación (URL directa,
+  // atrás/adelante o enlace). Sin sesión válida no se monta nada.
+  beforeLoad: async () => {
+    const { data } = await supabase.auth.getUser();
+    if (!data.user) {
+      throw redirect({ to: "/auth", replace: true });
+    }
+  },
   component: Layout,
 });
 
@@ -14,7 +23,7 @@ function Layout() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!loading && !session) navigate({ to: "/auth" });
+    if (!loading && !session) navigate({ to: "/auth", replace: true });
   }, [session, loading, navigate]);
 
   if (loading || !session) {
