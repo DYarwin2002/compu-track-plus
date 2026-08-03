@@ -13,11 +13,12 @@ import { Trash2, Plus, Check } from "lucide-react";
 import { toast } from "sonner";
 import { IGV_RATE, formatSoles } from "@/frontend/lib/format";
 import { useAuth } from "@/frontend/hooks/use-auth";
+import { sendBoletaWhatsApp } from "@/frontend/lib/whatsapp";
 
 
 
 type Product = { id: string; name: string; sku: string; sale_price: number; stock: number; serial_number: string | null; default_warranty_months: number };
-type Customer = { id: string; document: string; full_name: string };
+type Customer = { id: string; document: string; full_name: string; phone?: string | null };
 type LineItem = { key: string; product_id: string | null; product_name: string; serial_number: string; quantity: number; unit_price: number; warranty_months: number };
 
 function NewSale() {
@@ -38,7 +39,7 @@ function NewSale() {
   const [newCust, setNewCust] = useState({ document: "", full_name: "", phone: "" });
 
   useEffect(() => {
-    supabase.from("customers").select("id, document, full_name").order("full_name").then(({ data }) => setCustomers((data ?? []) as Customer[]));
+    supabase.from("customers").select("id, document, full_name, phone").order("full_name").then(({ data }) => setCustomers((data ?? []) as Customer[]));
     supabase.from("products").select("id, name, sku, sale_price, stock, serial_number, default_warranty_months").gt("stock", 0).order("name").then(({ data }) => setProducts((data ?? []) as Product[]));
   }, []);
 
@@ -91,6 +92,21 @@ function NewSale() {
     setSaving(false);
     if (itemsErr) return toast.error(itemsErr.message);
     toast.success(`Venta ${sale.sale_number} registrada`);
+    const cust = customers.find((c) => c.id === customerId);
+    toast("¿Enviar la boleta por WhatsApp?", {
+      duration: 10000,
+      action: {
+        label: "Enviar",
+        onClick: () =>
+          sendBoletaWhatsApp({
+            sale_number: sale.sale_number,
+            total: totals.total,
+            customer_name: cust?.full_name ?? null,
+            customer_document: cust?.document ?? null,
+            customer_phone: cust?.phone ?? null,
+          }),
+      },
+    });
     nav({ to: "/sales/$id", params: { id: sale.id } });
   };
 
