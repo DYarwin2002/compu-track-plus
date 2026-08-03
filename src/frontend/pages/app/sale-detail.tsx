@@ -5,8 +5,8 @@ import { Button } from "@/frontend/components/ui/button";
 import { Card } from "@/frontend/components/ui/card";
 import { Printer, ArrowLeft, Download, Trash2, MessageCircle } from "lucide-react";
 import { formatSoles, formatDateTime } from "@/frontend/lib/format";
-import { downloadBoletaPDF } from "@/frontend/lib/boleta-pdf";
-import { sendBoletaWhatsApp } from "@/frontend/lib/whatsapp";
+import { downloadBoletaPDF, type BoletaData } from "@/frontend/lib/boleta-pdf";
+import { sendBoletaPDFWhatsApp } from "@/frontend/lib/whatsapp";
 import { BUSINESS } from "@/frontend/lib/business";
 import { useAuth } from "@/frontend/hooks/use-auth";
 import { toast } from "sonner";
@@ -25,6 +25,7 @@ function SaleDetail() {
   const { isAdmin } = useAuth();
   const [sale, setSale] = useState<SaleFull | null>(null);
   const [format, setFormat] = useState<"a4" | "thermal">("a4");
+  const [sending, setSending] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -34,6 +35,25 @@ function SaleDetail() {
   }, [id]);
 
   if (!sale) return <div className="text-muted-foreground">Cargando…</div>;
+
+  const boletaData = (s: SaleFull): BoletaData => ({
+    sale_number: s.sale_number,
+    sale_date: s.sale_date,
+    subtotal: Number(s.subtotal),
+    discount: Number(s.discount),
+    igv: Number(s.igv),
+    total: Number(s.total),
+    payment_method: s.payment_method,
+    customer: s.customers,
+    items: s.sale_items.map((i) => ({
+      product_name: i.product_name,
+      serial_number: i.serial_number,
+      quantity: Number(i.quantity),
+      unit_price: Number(i.unit_price),
+      line_total: Number(i.line_total),
+      warranty_months: Number(i.warranty_months),
+    })),
+  });
 
   return (
     <div>
@@ -46,39 +66,25 @@ function SaleDetail() {
           </div>
           <Button variant="outline" onClick={() => {
             if (!sale) return;
-            downloadBoletaPDF({
-              sale_number: sale.sale_number,
-              sale_date: sale.sale_date,
-              subtotal: Number(sale.subtotal),
-              discount: Number(sale.discount),
-              igv: Number(sale.igv),
-              total: Number(sale.total),
-              payment_method: sale.payment_method,
-              customer: sale.customers,
-              items: sale.sale_items.map((i) => ({
-                product_name: i.product_name,
-                serial_number: i.serial_number,
-                quantity: Number(i.quantity),
-                unit_price: Number(i.unit_price),
-                line_total: Number(i.line_total),
-                warranty_months: Number(i.warranty_months),
-              })),
-            });
+            downloadBoletaPDF(boletaData(sale));
           }}><Download className="mr-2 h-4 w-4" /> PDF</Button>
           <Button
             variant="outline"
-            onClick={() => {
-              const ok = sendBoletaWhatsApp({
-                sale_number: sale.sale_number,
-                total: Number(sale.total),
-                customer_name: sale.customers?.full_name ?? null,
-                customer_document: sale.customers?.document ?? null,
-                customer_phone: sale.customers?.phone ?? null,
-              });
-              if (!ok) toast.info("El cliente no tiene teléfono: elige el contacto en WhatsApp");
+            disabled={sending}
+            onClick={async () => {
+              setSending(true);
+              const t = toast.loading("Preparando el PDF de la boleta…");
+              const res = await sendBoletaPDFWhatsApp(boletaData(sale));
+              toast.dismiss(t);
+              setSending(false);
+              if (res.mode === "file") toast.success("Elige WhatsApp para enviar el PDF");
+              else if (res.mode === "link") {
+                if (!res.hasNumber) toast.info("El cliente no tiene teléfono: elige el contacto en WhatsApp");
+                else toast.success("WhatsApp abierto con el PDF adjunto (enlace de descarga)");
+              } else toast.warning("No se pudo subir el PDF: se envió solo el mensaje");
             }}
           >
-            <MessageCircle className="mr-2 h-4 w-4" /> WhatsApp
+            <MessageCircle className="mr-2 h-4 w-4" /> {sending ? "Enviando…" : "Enviar PDF"}
           </Button>
           {isAdmin && (
             <Button
