@@ -3,9 +3,10 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/database/client";
 import { Button } from "@/frontend/components/ui/button";
 import { Card } from "@/frontend/components/ui/card";
-import { Printer, ArrowLeft, Download, Trash2 } from "lucide-react";
+import { Printer, ArrowLeft, Download, Trash2, MessageCircle } from "lucide-react";
 import { formatSoles, formatDateTime } from "@/frontend/lib/format";
 import { downloadBoletaPDF } from "@/frontend/lib/boleta-pdf";
+import { sendBoletaWhatsApp } from "@/frontend/lib/whatsapp";
 import { BUSINESS } from "@/frontend/lib/business";
 import { useAuth } from "@/frontend/hooks/use-auth";
 import { toast } from "sonner";
@@ -64,6 +65,21 @@ function SaleDetail() {
               })),
             });
           }}><Download className="mr-2 h-4 w-4" /> PDF</Button>
+          <Button
+            variant="outline"
+            onClick={() => {
+              const ok = sendBoletaWhatsApp({
+                sale_number: sale.sale_number,
+                total: Number(sale.total),
+                customer_name: sale.customers?.full_name ?? null,
+                customer_document: sale.customers?.document ?? null,
+                customer_phone: sale.customers?.phone ?? null,
+              });
+              if (!ok) toast.info("El cliente no tiene teléfono: elige el contacto en WhatsApp");
+            }}
+          >
+            <MessageCircle className="mr-2 h-4 w-4" /> WhatsApp
+          </Button>
           {isAdmin && (
             <Button
               variant="destructive"
