@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { formatSoles, formatDate, IGV_RATE } from "@/frontend/lib/format";
 import { MediaUpload } from "@/frontend/components/media-upload";
 import { signedMediaUrl } from "@/frontend/lib/media";
+import { useConfirm } from "@/frontend/components/confirm-dialog";
 
 
 
@@ -41,6 +42,7 @@ const empty: Partial<P> = {
 };
 
 function Purchases() {
+  const { confirm, confirmDialog } = useConfirm();
   const [rows, setRows] = useState<P[]>([]);
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
@@ -93,7 +95,12 @@ function Purchases() {
   };
 
   const remove = async (p: P) => {
-    if (!confirm(`¿Eliminar la compra ${p.doc_number}?`)) return;
+    if (!(await confirm({
+      title: `¿Eliminar la compra ${p.doc_number}?`,
+      description: "Esta acción no se puede deshacer.",
+      confirmText: "Eliminar",
+      destructive: true,
+    }))) return;
     const { error } = await supabase.from("purchases").delete().eq("id", p.id);
     if (error) return toast.error(error.message);
     toast.success("Eliminada"); load();
@@ -213,6 +220,7 @@ function Purchases() {
           {viewer.url && <img src={viewer.url} alt={viewer.title} className="max-h-[70vh] w-full rounded-lg object-contain" />}
         </DialogContent>
       </Dialog>
+      {confirmDialog}
     </div>
   );
 }

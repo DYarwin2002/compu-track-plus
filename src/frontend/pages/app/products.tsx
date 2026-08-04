@@ -13,6 +13,7 @@ import { formatSoles } from "@/frontend/lib/format";
 import { useAuth } from "@/frontend/hooks/use-auth";
 import { MediaUpload } from "@/frontend/components/media-upload";
 import { signedMediaUrls } from "@/frontend/lib/media";
+import { useConfirm } from "@/frontend/components/confirm-dialog";
 
 
 
@@ -29,6 +30,7 @@ const empty: Partial<Product> = { sku: "", name: "", brand: "", model: "", seria
 
 function Products() {
   const { role, can } = useAuth();
+  const { confirm, confirmDialog } = useConfirm();
   const canManage = can("products.manage");
   const canViewCost = can("products.view_cost");
   const [rows, setRows] = useState<Product[]>([]);
@@ -58,7 +60,12 @@ function Products() {
   };
 
   const remove = async (id: string) => {
-    if (!confirm("¿Eliminar este producto?")) return;
+    if (!(await confirm({
+      title: "¿Eliminar este producto?",
+      description: "Se quitará del inventario y del catálogo público.",
+      confirmText: "Eliminar",
+      destructive: true,
+    }))) return;
     const { error } = await supabase.from("products").delete().eq("id", id);
     if (error) return toast.error(error.message);
     toast.success("Eliminado"); load();
@@ -146,6 +153,7 @@ function Products() {
           </TableBody>
         </Table>
       </div>
+      {confirmDialog}
     </div>
   );
 }

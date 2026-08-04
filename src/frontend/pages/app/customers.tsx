@@ -8,6 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Plus, Pencil, Search, User, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/frontend/hooks/use-auth";
+import { useConfirm } from "@/frontend/components/confirm-dialog";
 
 
 
@@ -16,6 +17,7 @@ const empty: Partial<C> = { document: "", full_name: "", phone: "", email: "", a
 
 function Customers() {
   const { isAdmin } = useAuth();
+  const { confirm, confirmDialog } = useConfirm();
   const [rows, setRows] = useState<C[]>([]);
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
@@ -44,7 +46,12 @@ function Customers() {
   };
 
   const removeCustomer = async (c: C) => {
-    if (!confirm(`¿Eliminar a ${c.full_name}? Sus ventas y garantías quedarán sin cliente asignado.`)) return;
+    if (!(await confirm({
+      title: `¿Eliminar a ${c.full_name}?`,
+      description: "Sus ventas y garantías quedarán sin cliente asignado.",
+      confirmText: "Eliminar cliente",
+      destructive: true,
+    }))) return;
     const { error } = await supabase.from("customers").delete().eq("id", c.id);
     if (error) return toast.error(error.message);
     toast.success("Cliente eliminado"); load();
@@ -114,6 +121,7 @@ function Customers() {
           )}
         </DialogContent>
       </Dialog>
+      {confirmDialog}
     </div>
   );
 }

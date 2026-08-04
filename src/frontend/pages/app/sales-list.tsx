@@ -9,6 +9,7 @@ import { formatSoles, formatDateTime } from "@/frontend/lib/format";
 import { Badge } from "@/frontend/components/ui/badge";
 import { useAuth } from "@/frontend/hooks/use-auth";
 import { toast } from "sonner";
+import { useConfirm } from "@/frontend/components/confirm-dialog";
 
 
 
@@ -16,6 +17,7 @@ type S = { id: string; sale_number: string; sale_date: string; total: number; pa
 
 function SalesList() {
   const { isAdmin } = useAuth();
+  const { confirm, confirmDialog } = useConfirm();
   const [rows, setRows] = useState<S[]>([]);
   const [q, setQ] = useState("");
 
@@ -28,7 +30,12 @@ function SalesList() {
   useEffect(() => { load(); }, [q]);
 
   const removeSale = async (s: S) => {
-    if (!confirm(`¿Eliminar la venta ${s.sale_number}? Se borrarán sus productos y garantías asociadas.`)) return;
+    if (!(await confirm({
+      title: `¿Eliminar la venta ${s.sale_number}?`,
+      description: "Se borrarán sus productos y garantías asociadas.",
+      confirmText: "Eliminar venta",
+      destructive: true,
+    }))) return;
     const { error } = await supabase.from("sales").delete().eq("id", s.id);
     if (error) return toast.error(error.message);
     toast.success("Venta eliminada");
@@ -70,6 +77,7 @@ function SalesList() {
           </TableBody>
         </Table>
       </div>
+      {confirmDialog}
     </div>
   );
 }
