@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { toast } from "sonner";
 import { Shield, Save, Loader2, Plus, Trash2, Lock } from "lucide-react";
 import { ALL_PERMISSIONS, PERMISSION_GROUPS, type Permission } from "@/frontend/lib/permissions";
+import { useConfirm } from "@/frontend/components/confirm-dialog";
 
 
 
@@ -18,6 +19,7 @@ type Role = { key: string; label: string; description: string | null; is_system:
 
 function RolesPage() {
   const [roles, setRoles] = useState<Role[]>([]);
+  const { confirm, confirmDialog } = useConfirm();
   const [matrix, setMatrix] = useState<Record<string, Set<Permission>>>({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -112,7 +114,12 @@ function RolesPage() {
 
   const deleteRole = async (role: Role) => {
     if (role.is_system) return;
-    if (!confirm(`¿Eliminar el rol "${role.label}"? Los usuarios asignados a este rol deberán ser reasignados primero.`)) return;
+    if (!(await confirm({
+      title: `¿Eliminar el rol "${role.label}"?`,
+      description: "Los usuarios asignados a este rol deberán ser reasignados primero.",
+      confirmText: "Eliminar rol",
+      destructive: true,
+    }))) return;
     const { error } = await supabase.from("roles").delete().eq("key", role.key);
     if (error) return toast.error(error.message.includes("foreign key") ? "Hay usuarios usando este rol. Reasígnalos antes de eliminarlo." : error.message);
     toast.success("Rol eliminado");
@@ -247,6 +254,7 @@ function RolesPage() {
           </div>
         </>
       )}
+      {confirmDialog}
     </div>
   );
 }

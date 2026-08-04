@@ -10,6 +10,7 @@ import { sendBoletaPDFWhatsApp } from "@/frontend/lib/whatsapp";
 import { BUSINESS } from "@/frontend/lib/business";
 import { useAuth } from "@/frontend/hooks/use-auth";
 import { toast } from "sonner";
+import { useConfirm } from "@/frontend/components/confirm-dialog";
 
 
 
@@ -23,6 +24,7 @@ function SaleDetail() {
   const { id } = useParams({ from: "/_authenticated/sales/$id" });
   const navigate = useNavigate();
   const { isAdmin } = useAuth();
+  const { confirm, confirmDialog } = useConfirm();
   const [sale, setSale] = useState<SaleFull | null>(null);
   const [format, setFormat] = useState<"a4" | "thermal">("a4");
   const [sending, setSending] = useState(false);
@@ -90,7 +92,12 @@ function SaleDetail() {
             <Button
               variant="destructive"
               onClick={async () => {
-                if (!confirm(`¿Eliminar la boleta ${sale.sale_number}? Se borrarán sus productos y garantías.`)) return;
+                if (!(await confirm({
+                  title: `¿Eliminar la boleta ${sale.sale_number}?`,
+                  description: "Se borrarán sus productos y garantías.",
+                  confirmText: "Eliminar boleta",
+                  destructive: true,
+                }))) return;
                 const { error } = await supabase.from("sales").delete().eq("id", sale.id);
                 if (error) return toast.error(error.message);
                 toast.success("Venta eliminada");
@@ -105,6 +112,7 @@ function SaleDetail() {
       </div>
 
       {format === "a4" ? <BoletaA4 sale={sale} /> : <BoletaThermal sale={sale} />}
+      {confirmDialog}
     </div>
   );
 }
