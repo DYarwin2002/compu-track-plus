@@ -30,6 +30,7 @@ const empty: Partial<Product> = { sku: "", name: "", brand: "", model: "", seria
 
 function Products() {
   const { role, can } = useAuth();
+  const { confirm, confirmDialog } = useConfirm();
   const canManage = can("products.manage");
   const canViewCost = can("products.view_cost");
   const [rows, setRows] = useState<Product[]>([]);

@@ -42,6 +42,7 @@ const empty: Partial<P> = {
 };
 
 function Purchases() {
+  const { confirm, confirmDialog } = useConfirm();
   const [rows, setRows] = useState<P[]>([]);
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
@@ -219,6 +220,7 @@ function Purchases() {
           {viewer.url && <img src={viewer.url} alt={viewer.title} className="max-h-[70vh] w-full rounded-lg object-contain" />}
         </DialogContent>
       </Dialog>
+      {confirmDialog}
     </div>
   );
 }
