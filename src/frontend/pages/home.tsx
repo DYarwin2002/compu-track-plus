@@ -125,7 +125,7 @@ function Landing() {
         <div className="mx-auto grid max-w-6xl items-center gap-8 px-4 py-14 sm:px-6 lg:grid-cols-2 lg:py-20">
           <div>
             <span className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-3 py-1 text-xs text-muted-foreground">
-              <Sparkles className="h-3.5 w-3.5 text-primary" /> Tienda + servicio técnico en Yarango
+              <Sparkles className="h-3.5 w-3.5 text-primary" /> Tienda + servicio técnico en Santa Cruz
             </span>
             <h1 className="mt-5 text-4xl font-black leading-[1.05] tracking-tight sm:text-5xl">
               Laptops, PCs y componentes{" "}
@@ -370,9 +370,9 @@ function Landing() {
             <p className="mt-2 text-xs text-muted-foreground">Venta, mantenimiento y reparación de computadoras.</p>
           </div>
           <div className="space-y-2 text-xs text-muted-foreground">
-            <p className="flex items-center gap-2"><MapPin className="h-3.5 w-3.5 text-primary" /> Yarango, Perú</p>
+            <p className="flex items-center gap-2"><MapPin className="h-3.5 w-3.5 text-primary" /> {BUSINESS.address}</p>
             <p className="flex items-center gap-2"><Phone className="h-3.5 w-3.5 text-primary" /> Atención por WhatsApp</p>
-            <p className="flex items-center gap-2"><Clock className="h-3.5 w-3.5 text-primary" /> Lun a Sáb · 9:00 – 19:00</p>
+            <p className="flex items-center gap-2"><Clock className="h-3.5 w-3.5 text-primary" /> Lunes a Domingo · 9:00 – 19:00</p>
           </div>
           <div className="flex flex-col items-start gap-2 text-xs">
             <Link to="/consultar" className="font-semibold text-primary hover:underline">Portal de clientes</Link>
