@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { IGV_RATE, formatSoles } from "@/frontend/lib/format";
 import { useAuth } from "@/frontend/hooks/use-auth";
 import { sendBoletaWhatsApp } from "@/frontend/lib/whatsapp";
+import { useAlert } from "@/frontend/components/alert-modal";
 
 
 
@@ -23,6 +24,7 @@ type LineItem = { key: string; product_id: string | null; product_name: string; 
 
 function NewSale() {
   const nav = useNavigate();
+  const { alert, alertModal } = useAlert();
   const { user, can } = useAuth();
   const canCreate = can("sales.create");
   const canCreateCustomer = can("customers.manage");
@@ -64,25 +66,33 @@ function NewSale() {
   }, [items, discount]);
 
   const createCustomer = async () => {
-    if (!canCreateCustomer) return toast.error("No tienes permiso para crear clientes");
-    if (!newCust.document || !newCust.full_name) return toast.error("DNI/RUC y nombre son obligatorios");
+    if (!canCreateCustomer) return alert({ title: "Sin permiso", description: "No tienes permiso para crear clientes." });
+    if (!newCust.document.trim() || !newCust.full_name.trim())
+      return alert({ title: "Faltan datos obligatorios", description: "El DNI / RUC y el nombre del cliente son obligatorios." });
     const { data, error } = await supabase.from("customers").insert(newCust).select().single();
-    if (error) return toast.error(error.message);
+    if (error) return alert({ title: "No se pudo crear el cliente", description: error.message });
     setCustomers((c) => [...c, data as Customer]); setCustomerId(data.id);
     setNewCust({ document: "", full_name: "", phone: "" });
     toast.success("Cliente creado");
   };
 
   const submit = async () => {
-    if (!canCreate) return toast.error("No tienes permiso para registrar ventas");
-    if (items.length === 0) return toast.error("Agrega al menos un producto");
+    if (!canCreate) return alert({ title: "Sin permiso", description: "No tienes permiso para registrar ventas." });
+    if (items.length === 0)
+      return alert({ title: "La venta está vacía", description: "Agrega al menos un producto antes de registrar la venta." });
+    const invalid = items.find((i) => !i.product_name.trim() || i.quantity <= 0 || i.unit_price <= 0);
+    if (invalid)
+      return alert({
+        title: "Revisa los productos",
+        description: "Cada línea necesita descripción, cantidad mayor a cero y precio mayor a cero.",
+      });
     setSaving(true);
     const { data: sale, error } = await supabase.from("sales").insert({
       customer_id: customerId, payment_method: payment as never,
       subtotal: totals.subtotal, discount: totals.discount, igv: totals.igv, total: totals.total,
       created_by: user?.id,
     }).select().single();
-    if (error || !sale) { setSaving(false); return toast.error(error?.message ?? "Error"); }
+    if (error || !sale) { setSaving(false); return alert({ title: "No se pudo registrar la venta", description: error?.message ?? "Error inesperado" }); }
     const payload = items.map((i) => ({
       sale_id: sale.id, product_id: i.product_id, product_name: i.product_name,
       serial_number: i.serial_number || null, quantity: i.quantity, unit_price: i.unit_price,
@@ -90,7 +100,7 @@ function NewSale() {
     }));
     const { error: itemsErr } = await supabase.from("sale_items").insert(payload);
     setSaving(false);
-    if (itemsErr) return toast.error(itemsErr.message);
+    if (itemsErr) return alert({ title: "No se pudieron guardar los productos", description: itemsErr.message });
     toast.success(`Venta ${sale.sale_number} registrada`);
     const cust = customers.find((c) => c.id === customerId);
     toast("¿Enviar la boleta por WhatsApp?", {
@@ -223,6 +233,7 @@ function NewSale() {
           </Card>
         </div>
       </div>
+      {alertModal}
     </div>
   );
 }
