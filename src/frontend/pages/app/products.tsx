@@ -108,11 +108,31 @@ function Products() {
               <Field label="Marca"><Input value={editing.brand ?? ""} onChange={(e) => setEditing({ ...editing, brand: e.target.value })} /></Field>
               <Field label="Modelo"><Input value={editing.model ?? ""} onChange={(e) => setEditing({ ...editing, model: e.target.value })} /></Field>
               <Field label="N° de serie"><Input value={editing.serial_number ?? ""} onChange={(e) => setEditing({ ...editing, serial_number: e.target.value })} /></Field>
-              <Field label="Categoría">
-                <Select value={editing.category} onValueChange={(v) => setEditing({ ...editing, category: v })}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>{CATEGORIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
-                </Select>
+              <Field label="Categoría del catálogo">
+                {addingCat ? (
+                  <div className="flex gap-2">
+                    <Input
+                      autoFocus
+                      placeholder="Nueva categoría (ej. Teclados)"
+                      value={newCat}
+                      onChange={(e) => setNewCat(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); saveNewCategory(); } }}
+                    />
+                    <Button type="button" variant="outline" onClick={saveNewCategory}>Añadir</Button>
+                    <Button type="button" variant="ghost" onClick={() => { setAddingCat(false); setNewCat(""); }}>Cancelar</Button>
+                  </div>
+                ) : (
+                  <Select
+                    value={editing.category}
+                    onValueChange={(v) => (v === NEW_CATEGORY ? setAddingCat(true) : setEditing({ ...editing, category: v }))}
+                  >
+                    <SelectTrigger><SelectValue placeholder="Selecciona una categoría" /></SelectTrigger>
+                    <SelectContent>
+                      {categories.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                      <SelectItem value={NEW_CATEGORY}>➕ Registrar nueva categoría…</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
               </Field>
               <Field label="Estado">
                 <Select value={editing.condition} onValueChange={(v) => setEditing({ ...editing, condition: v })}>
