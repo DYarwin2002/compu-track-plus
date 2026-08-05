@@ -10,6 +10,8 @@ import { toast } from "sonner";
 import { Monitor } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { logAudit } from "@/backend/functions/audit.functions";
+import { useAlert } from "@/frontend/components/alert-modal";
+import { authErrorMessage } from "@/frontend/lib/auth-errors";
 
 
 
@@ -17,6 +19,7 @@ function AuthPage() {
   const { session, loading } = useAuth();
   const nav = useNavigate();
   const runAudit = useServerFn(logAudit);
+  const { alert, alertModal } = useAlert();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
@@ -25,10 +28,14 @@ function AuthPage() {
 
   const doSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!email.trim() || !password) {
+      alert({ title: "Faltan datos", description: "Ingresa tu correo y tu contraseña para continuar." });
+      return;
+    }
     setBusy(true);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setBusy(false);
-    if (error) toast.error(error.message);
+    if (error) alert(authErrorMessage(error.message));
     else {
       toast.success("Bienvenido");
       runAudit({ data: { action: "auth.sign_in", entity: "session" } }).catch(() => {});
@@ -54,9 +61,9 @@ function AuthPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={doSignIn} className="space-y-3">
-              <div><Label>Correo</Label><Input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} /></div>
-              <div><Label>Contraseña</Label><Input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} /></div>
+            <form onSubmit={doSignIn} className="space-y-3" noValidate>
+              <div><Label>Correo</Label><Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} /></div>
+              <div><Label>Contraseña</Label><Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} /></div>
               <Button type="submit" className="w-full" disabled={busy}>{busy ? "Ingresando…" : "Entrar"}</Button>
               <p className="pt-2 text-xs text-muted-foreground">
                 ¿Necesitas una cuenta? Solicítala al administrador del sistema. El registro público
@@ -66,6 +73,7 @@ function AuthPage() {
           </CardContent>
         </Card>
       </div>
+      {alertModal}
     </div>
   );
 }
