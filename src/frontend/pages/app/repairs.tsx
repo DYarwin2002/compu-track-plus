@@ -18,6 +18,7 @@ import {
 import { Plus, Pencil, Wrench, Search } from "lucide-react";
 import { toast } from "sonner";
 import { formatSoles, formatDate } from "@/frontend/lib/format";
+import { useAlert } from "@/frontend/components/alert-modal";
 
 
 
@@ -152,7 +153,10 @@ function RepairsPage() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.device.trim() || !form.reported_issue.trim()) {
-      toast.error("Equipo y falla reportada son obligatorios");
+      alert({
+        title: "Faltan datos obligatorios",
+        description: "Indica el equipo recibido y la falla reportada por el cliente.",
+      });
       return;
     }
     setBusy(true);
@@ -185,7 +189,7 @@ function RepairsPage() {
       setOpen(false);
       load();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Error");
+      alert({ title: "No se pudo guardar la orden", description: err instanceof Error ? err.message : "Error inesperado" });
     } finally {
       setBusy(false);
     }
@@ -389,6 +393,7 @@ function RepairsPage() {
           </form>
         </DialogContent>
       </Dialog>
+      {alertModal}
     </div>
   );
 }
