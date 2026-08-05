@@ -58,6 +58,15 @@ function Products() {
   };
   useEffect(() => { load(); }, [q]);
 
+  const saveNewCategory = () => {
+    const name = newCat.trim();
+    if (!name) return alert({ title: "Escribe el nombre de la categoría", description: "Ej. Teclados, Cámaras, Sillas gamer." });
+    setCustomCats((prev) => Array.from(new Set([...prev, name])));
+    setEditing((prev) => ({ ...prev, category: name }));
+    setNewCat("");
+    setAddingCat(false);
+  };
+
   const save = async () => {
     if (addingCat && newCat.trim()) saveNewCategory();
     if (!editing.sku?.trim() || !editing.name?.trim()) {
