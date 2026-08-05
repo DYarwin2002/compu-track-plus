@@ -14,6 +14,7 @@ import { formatSoles, formatDate, IGV_RATE } from "@/frontend/lib/format";
 import { MediaUpload } from "@/frontend/components/media-upload";
 import { signedMediaUrl } from "@/frontend/lib/media";
 import { useConfirm } from "@/frontend/components/confirm-dialog";
+import { useAlert } from "@/frontend/components/alert-modal";
 
 
 
@@ -43,6 +44,7 @@ const empty: Partial<P> = {
 
 function Purchases() {
   const { confirm, confirmDialog } = useConfirm();
+  const { alert, alertModal } = useAlert();
   const [rows, setRows] = useState<P[]>([]);
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
@@ -72,8 +74,15 @@ function Purchases() {
   };
 
   const save = async () => {
-    if (!editing.supplier_name?.trim()) return toast.error("Indica el proveedor");
-    if (!editing.doc_number?.trim()) return toast.error("Indica el número del comprobante");
+    if (!editing.supplier_name?.trim() || !editing.doc_number?.trim()) {
+      return alert({
+        title: "Faltan datos obligatorios",
+        description: "El nombre del proveedor y el número del comprobante son obligatorios.",
+      });
+    }
+    if (!Number(editing.total)) {
+      return alert({ title: "Falta el total", description: "Ingresa el monto total del comprobante." });
+    }
     const payload = {
       supplier_name: editing.supplier_name.trim(),
       supplier_ruc: editing.supplier_ruc?.trim() || null,
@@ -90,7 +99,7 @@ function Purchases() {
     const { error } = editing.id
       ? await supabase.from("purchases").update(payload).eq("id", editing.id)
       : await supabase.from("purchases").insert(payload);
-    if (error) return toast.error(error.message);
+    if (error) return alert({ title: "No se pudo guardar la compra", description: error.message });
     toast.success("Compra registrada"); setOpen(false); setEditing(empty); load();
   };
 
@@ -102,13 +111,13 @@ function Purchases() {
       destructive: true,
     }))) return;
     const { error } = await supabase.from("purchases").delete().eq("id", p.id);
-    if (error) return toast.error(error.message);
+    if (error) return alert({ title: "No se pudo eliminar", description: error.message });
     toast.success("Eliminada"); load();
   };
 
   const openImage = async (p: P) => {
     const url = await signedMediaUrl(p.image_url);
-    if (!url) return toast.error("Sin comprobante adjunto");
+    if (!url) return alert({ title: "Sin comprobante adjunto", description: "Esta compra no tiene una imagen o PDF guardado." });
     setViewer({ open: true, url, title: `${p.doc_type} ${p.doc_number}` });
   };
 
@@ -221,6 +230,7 @@ function Purchases() {
         </DialogContent>
       </Dialog>
       {confirmDialog}
+      {alertModal}
     </div>
   );
 }
