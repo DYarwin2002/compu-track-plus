@@ -330,6 +330,30 @@ function Landing() {
         </div>
       </section>
 
+      {/* Lista de cotización */}
+      {quoteItems.length > 0 && (
+        <div className="sticky bottom-4 z-40 mx-auto w-[calc(100%-2rem)] max-w-3xl">
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-background/95 p-4 shadow-xl backdrop-blur">
+            <div className="min-w-0">
+              <p className="text-sm font-black">
+                {quoteItems.length} producto{quoteItems.length > 1 ? "s" : ""} en tu cotización
+              </p>
+              <p className="truncate text-xs text-muted-foreground">
+                Total referencial {formatSoles(quoteTotal)} · {quoteItems.map((p) => p.name).join(", ")}
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="ghost" size="sm" onClick={() => setQuote([])}>Vaciar</Button>
+              <Button asChild size="sm" className="font-bold" style={{ background: "var(--gradient-primary)" }}>
+                <a href={quoteMessage()} target="_blank" rel="noreferrer">
+                  <MessageCircle className="mr-2 h-4 w-4" /> Pedir cotización
+                </a>
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Detalle de producto */}
       <Dialog open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>
         <DialogContent className="max-w-lg">
