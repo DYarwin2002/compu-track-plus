@@ -11,10 +11,13 @@ import {
 } from "@/frontend/components/ui/dialog";
 import { toast } from "sonner";
 import { Monitor } from "lucide-react";
+import { useAlert } from "@/frontend/components/alert-modal";
+import { authErrorMessage } from "@/frontend/lib/auth-errors";
 
 export function LoginDialog({ children }: { children: ReactNode }) {
   const nav = useNavigate();
   const runAudit = useServerFn(logAudit);
+  const { alert, alertModal } = useAlert();
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -22,11 +25,15 @@ export function LoginDialog({ children }: { children: ReactNode }) {
 
   const doSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!email.trim() || !password) {
+      alert({ title: "Faltan datos", description: "Ingresa tu correo y tu contraseña para continuar." });
+      return;
+    }
     setBusy(true);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setBusy(false);
     if (error) {
-      toast.error(error.message);
+      alert(authErrorMessage(error.message));
       return;
     }
     toast.success("Bienvenido");
@@ -51,14 +58,14 @@ export function LoginDialog({ children }: { children: ReactNode }) {
             Acceso exclusivo para el personal autorizado. Los clientes usan el portal público.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={doSignIn} className="space-y-3">
+        <form onSubmit={doSignIn} className="space-y-3" noValidate>
           <div>
             <Label>Correo</Label>
-            <Input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
+            <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
           </div>
           <div>
             <Label>Contraseña</Label>
-            <Input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} />
+            <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
           </div>
           <Button type="submit" className="w-full" disabled={busy}>
             {busy ? "Ingresando…" : "Entrar"}
@@ -68,6 +75,7 @@ export function LoginDialog({ children }: { children: ReactNode }) {
           </p>
         </form>
       </DialogContent>
+      {alertModal}
     </Dialog>
   );
 }
