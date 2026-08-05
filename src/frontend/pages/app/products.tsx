@@ -14,6 +14,7 @@ import { useAuth } from "@/frontend/hooks/use-auth";
 import { MediaUpload } from "@/frontend/components/media-upload";
 import { signedMediaUrls } from "@/frontend/lib/media";
 import { useConfirm } from "@/frontend/components/confirm-dialog";
+import { useAlert } from "@/frontend/components/alert-modal";
 
 
 
@@ -31,6 +32,7 @@ const empty: Partial<Product> = { sku: "", name: "", brand: "", model: "", seria
 function Products() {
   const { role, can } = useAuth();
   const { confirm, confirmDialog } = useConfirm();
+  const { alert, alertModal } = useAlert();
   const canManage = can("products.manage");
   const canViewCost = can("products.view_cost");
   const [rows, setRows] = useState<Product[]>([]);
@@ -51,11 +53,26 @@ function Products() {
   useEffect(() => { load(); }, [q]);
 
   const save = async () => {
+    if (!editing.sku?.trim() || !editing.name?.trim()) {
+      return alert({
+        title: "Faltan datos obligatorios",
+        description: "El SKU / código y el nombre del producto son obligatorios.",
+      });
+    }
+    if (!editing.category) {
+      return alert({ title: "Falta la categoría", description: "Selecciona la categoría del producto." });
+    }
+    if (!Number(editing.sale_price)) {
+      return alert({
+        title: "Falta el precio de venta",
+        description: "Ingresa un precio de venta mayor a cero.",
+      });
+    }
     const payload = { ...editing, purchase_price: Number(editing.purchase_price) || 0, sale_price: Number(editing.sale_price) || 0, stock: Number(editing.stock) || 0, default_warranty_months: Number(editing.default_warranty_months) || 12 };
     const { error } = editing.id
       ? await supabase.from("products").update(payload as never).eq("id", editing.id)
       : await supabase.from("products").insert(payload as never);
-    if (error) return toast.error(error.message);
+    if (error) return alert({ title: "No se pudo guardar el producto", description: error.message });
     toast.success("Guardado"); setOpen(false); setEditing(empty); load();
   };
 
@@ -67,7 +84,7 @@ function Products() {
       destructive: true,
     }))) return;
     const { error } = await supabase.from("products").delete().eq("id", id);
-    if (error) return toast.error(error.message);
+    if (error) return alert({ title: "No se pudo eliminar", description: error.message });
     toast.success("Eliminado"); load();
   };
 
@@ -80,8 +97,8 @@ function Products() {
           <DialogContent className="max-w-2xl">
             <DialogHeader><DialogTitle>{editing.id ? "Editar" : "Nuevo"} producto</DialogTitle></DialogHeader>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <Field label="SKU / Código"><Input value={editing.sku ?? ""} onChange={(e) => setEditing({ ...editing, sku: e.target.value })} /></Field>
-              <Field label="Nombre"><Input value={editing.name ?? ""} onChange={(e) => setEditing({ ...editing, name: e.target.value })} /></Field>
+              <Field label="SKU / Código *"><Input value={editing.sku ?? ""} onChange={(e) => setEditing({ ...editing, sku: e.target.value })} /></Field>
+              <Field label="Nombre *"><Input value={editing.name ?? ""} onChange={(e) => setEditing({ ...editing, name: e.target.value })} /></Field>
               <Field label="Marca"><Input value={editing.brand ?? ""} onChange={(e) => setEditing({ ...editing, brand: e.target.value })} /></Field>
               <Field label="Modelo"><Input value={editing.model ?? ""} onChange={(e) => setEditing({ ...editing, model: e.target.value })} /></Field>
               <Field label="N° de serie"><Input value={editing.serial_number ?? ""} onChange={(e) => setEditing({ ...editing, serial_number: e.target.value })} /></Field>
@@ -98,7 +115,7 @@ function Products() {
                 </Select>
               </Field>
               {canViewCost && <Field label="Precio de compra"><Input type="number" step="0.01" value={editing.purchase_price ?? 0} onChange={(e) => setEditing({ ...editing, purchase_price: parseFloat(e.target.value) })} /></Field>}
-              <Field label="Precio de venta"><Input type="number" step="0.01" value={editing.sale_price ?? 0} onChange={(e) => setEditing({ ...editing, sale_price: parseFloat(e.target.value) })} /></Field>
+              <Field label="Precio de venta *"><Input type="number" step="0.01" value={editing.sale_price ?? 0} onChange={(e) => setEditing({ ...editing, sale_price: parseFloat(e.target.value) })} /></Field>
               <Field label="Stock"><Input type="number" value={editing.stock ?? 0} onChange={(e) => setEditing({ ...editing, stock: parseInt(e.target.value) })} /></Field>
               <Field label="Garantía (meses)"><Input type="number" value={editing.default_warranty_months ?? 12} onChange={(e) => setEditing({ ...editing, default_warranty_months: parseInt(e.target.value) })} /></Field>
               <div className="sm:col-span-2">
@@ -154,6 +171,7 @@ function Products() {
         </Table>
       </div>
       {confirmDialog}
+      {alertModal}
     </div>
   );
 }
