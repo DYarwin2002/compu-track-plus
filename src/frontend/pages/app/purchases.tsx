@@ -44,6 +44,7 @@ const empty: Partial<P> = {
 
 function Purchases() {
   const { confirm, confirmDialog } = useConfirm();
+  const { alert, alertModal } = useAlert();
   const [rows, setRows] = useState<P[]>([]);
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
@@ -229,6 +230,7 @@ function Purchases() {
         </DialogContent>
       </Dialog>
       {confirmDialog}
+      {alertModal}
     </div>
   );
 }
