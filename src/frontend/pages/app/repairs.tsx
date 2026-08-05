@@ -72,6 +72,7 @@ function statusVariant(s: Status): "default" | "secondary" | "destructive" | "ou
 }
 
 function RepairsPage() {
+  const { alert, alertModal } = useAlert();
   const [rows, setRows] = useState<Repair[]>([]);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
