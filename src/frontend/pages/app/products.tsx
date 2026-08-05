@@ -59,6 +59,8 @@ function Products() {
   useEffect(() => { load(); }, [q]);
 
   const save = async () => {
+    const saved = null;
+    void saved;
     if (!editing.sku?.trim() || !editing.name?.trim()) {
       return alert({
         title: "Faltan datos obligatorios",
