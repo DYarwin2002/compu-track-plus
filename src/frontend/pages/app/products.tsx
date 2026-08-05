@@ -110,7 +110,7 @@ function Products() {
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div><h1 className="text-2xl font-black">Productos</h1><p className="text-sm text-muted-foreground">Inventario y control de stock.</p></div>
-        {canManage && <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) setEditing(empty); }}>
+        {canManage && <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) { setEditing(empty); setAddingCat(false); setNewCat(""); } }}>
           <DialogTrigger asChild><Button><Plus className="mr-2 h-4 w-4" /> Nuevo producto</Button></DialogTrigger>
           <DialogContent className="max-w-2xl">
             <DialogHeader><DialogTitle>{editing.id ? "Editar" : "Nuevo"} producto</DialogTitle></DialogHeader>
