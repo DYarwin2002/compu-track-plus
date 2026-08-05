@@ -68,14 +68,16 @@ function Products() {
   };
 
   const save = async () => {
-    if (addingCat && newCat.trim()) saveNewCategory();
+    const pendingCat = addingCat ? newCat.trim() : "";
+    if (pendingCat) saveNewCategory();
+    const category = pendingCat || editing.category;
     if (!editing.sku?.trim() || !editing.name?.trim()) {
       return alert({
         title: "Faltan datos obligatorios",
         description: "El SKU / código y el nombre del producto son obligatorios.",
       });
     }
-    if (!editing.category) {
+    if (!category) {
       return alert({ title: "Falta la categoría", description: "Selecciona la categoría del producto." });
     }
     if (!Number(editing.sale_price)) {
@@ -84,7 +86,7 @@ function Products() {
         description: "Ingresa un precio de venta mayor a cero.",
       });
     }
-    const payload = { ...editing, purchase_price: Number(editing.purchase_price) || 0, sale_price: Number(editing.sale_price) || 0, stock: Number(editing.stock) || 0, default_warranty_months: Number(editing.default_warranty_months) || 12 };
+    const payload = { ...editing, category, purchase_price: Number(editing.purchase_price) || 0, sale_price: Number(editing.sale_price) || 0, stock: Number(editing.stock) || 0, default_warranty_months: Number(editing.default_warranty_months) || 12 };
     const { error } = editing.id
       ? await supabase.from("products").update(payload as never).eq("id", editing.id)
       : await supabase.from("products").insert(payload as never);
