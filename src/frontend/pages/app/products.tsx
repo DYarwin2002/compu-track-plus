@@ -24,7 +24,8 @@ type Product = {
   image_url: string | null;
 };
 
-const CATEGORIES = ["Laptop", "PC", "Monitor", "Impresora", "SSD", "RAM", "Accesorio", "Otro"];
+const BASE_CATEGORIES = ["Laptop", "PC", "Monitor", "Impresora", "SSD", "RAM", "Accesorio", "Otro"];
+const NEW_CATEGORY = "__nueva__";
 const CONDITIONS = ["Nuevo", "Usado", "Reacondicionado"];
 
 const empty: Partial<Product> = { sku: "", name: "", brand: "", model: "", serial_number: "", category: "Laptop", purchase_price: 0, sale_price: 0, stock: 1, condition: "Nuevo", default_warranty_months: 12, image_url: null };
@@ -40,6 +41,11 @@ function Products() {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Partial<Product>>(empty);
   const [thumbs, setThumbs] = useState<Record<string, string>>({});
+  const [customCats, setCustomCats] = useState<string[]>([]);
+  const [newCat, setNewCat] = useState("");
+  const [addingCat, setAddingCat] = useState(false);
+
+  const categories = Array.from(new Set([...BASE_CATEGORIES, ...customCats, ...rows.map((r) => r.category)])).filter(Boolean);
 
   const load = async () => {
     let query = supabase.from("products").select("*").order("created_at", { ascending: false });
