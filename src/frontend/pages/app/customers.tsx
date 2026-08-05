@@ -9,6 +9,7 @@ import { Plus, Pencil, Search, User, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/frontend/hooks/use-auth";
 import { useConfirm } from "@/frontend/components/confirm-dialog";
+import { useAlert } from "@/frontend/components/alert-modal";
 
 
 
@@ -18,6 +19,7 @@ const empty: Partial<C> = { document: "", full_name: "", phone: "", email: "", a
 function Customers() {
   const { isAdmin } = useAuth();
   const { confirm, confirmDialog } = useConfirm();
+  const { alert, alertModal } = useAlert();
   const [rows, setRows] = useState<C[]>([]);
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
@@ -33,10 +35,16 @@ function Customers() {
   useEffect(() => { load(); }, [q]);
 
   const save = async () => {
+    if (!editing.document?.trim() || !editing.full_name?.trim()) {
+      return alert({
+        title: "Faltan datos obligatorios",
+        description: "El DNI / RUC y los nombres y apellidos son obligatorios para guardar el cliente.",
+      });
+    }
     const { error } = editing.id
       ? await supabase.from("customers").update(editing).eq("id", editing.id)
       : await supabase.from("customers").insert(editing as never);
-    if (error) return toast.error(error.message);
+    if (error) return alert({ title: "No se pudo guardar el cliente", description: error.message });
     toast.success("Guardado"); setOpen(false); setEditing(empty); load();
   };
 
@@ -53,7 +61,7 @@ function Customers() {
       destructive: true,
     }))) return;
     const { error } = await supabase.from("customers").delete().eq("id", c.id);
-    if (error) return toast.error(error.message);
+    if (error) return alert({ title: "No se pudo eliminar", description: error.message });
     toast.success("Cliente eliminado"); load();
   };
 
@@ -66,8 +74,8 @@ function Customers() {
           <DialogContent>
             <DialogHeader><DialogTitle>{editing.id ? "Editar" : "Nuevo"} cliente</DialogTitle></DialogHeader>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <F label="DNI / RUC"><Input value={editing.document ?? ""} onChange={(e) => setEditing({ ...editing, document: e.target.value })} /></F>
-              <F label="Nombres y apellidos"><Input value={editing.full_name ?? ""} onChange={(e) => setEditing({ ...editing, full_name: e.target.value })} /></F>
+              <F label="DNI / RUC *"><Input value={editing.document ?? ""} onChange={(e) => setEditing({ ...editing, document: e.target.value })} /></F>
+              <F label="Nombres y apellidos *"><Input value={editing.full_name ?? ""} onChange={(e) => setEditing({ ...editing, full_name: e.target.value })} /></F>
               <F label="Teléfono"><Input value={editing.phone ?? ""} onChange={(e) => setEditing({ ...editing, phone: e.target.value })} /></F>
               <F label="Correo"><Input type="email" value={editing.email ?? ""} onChange={(e) => setEditing({ ...editing, email: e.target.value })} /></F>
               <div className="sm:col-span-2"><F label="Dirección"><Input value={editing.address ?? ""} onChange={(e) => setEditing({ ...editing, address: e.target.value })} /></F></div>
@@ -122,6 +130,7 @@ function Customers() {
         </DialogContent>
       </Dialog>
       {confirmDialog}
+      {alertModal}
     </div>
   );
 }
