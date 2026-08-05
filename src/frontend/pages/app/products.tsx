@@ -24,7 +24,8 @@ type Product = {
   image_url: string | null;
 };
 
-const CATEGORIES = ["Laptop", "PC", "Monitor", "Impresora", "SSD", "RAM", "Accesorio", "Otro"];
+const BASE_CATEGORIES = ["Laptop", "PC", "Monitor", "Impresora", "SSD", "RAM", "Accesorio", "Otro"];
+const NEW_CATEGORY = "__nueva__";
 const CONDITIONS = ["Nuevo", "Usado", "Reacondicionado"];
 
 const empty: Partial<Product> = { sku: "", name: "", brand: "", model: "", serial_number: "", category: "Laptop", purchase_price: 0, sale_price: 0, stock: 1, condition: "Nuevo", default_warranty_months: 12, image_url: null };
@@ -40,6 +41,11 @@ function Products() {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Partial<Product>>(empty);
   const [thumbs, setThumbs] = useState<Record<string, string>>({});
+  const [customCats, setCustomCats] = useState<string[]>([]);
+  const [newCat, setNewCat] = useState("");
+  const [addingCat, setAddingCat] = useState(false);
+
+  const categories = Array.from(new Set([...BASE_CATEGORIES, ...customCats, ...rows.map((r) => r.category)])).filter(Boolean);
 
   const load = async () => {
     let query = supabase.from("products").select("*").order("created_at", { ascending: false });
@@ -52,14 +58,26 @@ function Products() {
   };
   useEffect(() => { load(); }, [q]);
 
+  const saveNewCategory = () => {
+    const name = newCat.trim();
+    if (!name) return alert({ title: "Escribe el nombre de la categoría", description: "Ej. Teclados, Cámaras, Sillas gamer." });
+    setCustomCats((prev) => Array.from(new Set([...prev, name])));
+    setEditing((prev) => ({ ...prev, category: name }));
+    setNewCat("");
+    setAddingCat(false);
+  };
+
   const save = async () => {
+    const pendingCat = addingCat ? newCat.trim() : "";
+    if (pendingCat) saveNewCategory();
+    const category = pendingCat || editing.category;
     if (!editing.sku?.trim() || !editing.name?.trim()) {
       return alert({
         title: "Faltan datos obligatorios",
         description: "El SKU / código y el nombre del producto son obligatorios.",
       });
     }
-    if (!editing.category) {
+    if (!category) {
       return alert({ title: "Falta la categoría", description: "Selecciona la categoría del producto." });
     }
     if (!Number(editing.sale_price)) {
@@ -68,7 +86,7 @@ function Products() {
         description: "Ingresa un precio de venta mayor a cero.",
       });
     }
-    const payload = { ...editing, purchase_price: Number(editing.purchase_price) || 0, sale_price: Number(editing.sale_price) || 0, stock: Number(editing.stock) || 0, default_warranty_months: Number(editing.default_warranty_months) || 12 };
+    const payload = { ...editing, category, purchase_price: Number(editing.purchase_price) || 0, sale_price: Number(editing.sale_price) || 0, stock: Number(editing.stock) || 0, default_warranty_months: Number(editing.default_warranty_months) || 12 };
     const { error } = editing.id
       ? await supabase.from("products").update(payload as never).eq("id", editing.id)
       : await supabase.from("products").insert(payload as never);
@@ -92,7 +110,7 @@ function Products() {
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div><h1 className="text-2xl font-black">Productos</h1><p className="text-sm text-muted-foreground">Inventario y control de stock.</p></div>
-        {canManage && <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) setEditing(empty); }}>
+        {canManage && <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) { setEditing(empty); setAddingCat(false); setNewCat(""); } }}>
           <DialogTrigger asChild><Button><Plus className="mr-2 h-4 w-4" /> Nuevo producto</Button></DialogTrigger>
           <DialogContent className="max-w-2xl">
             <DialogHeader><DialogTitle>{editing.id ? "Editar" : "Nuevo"} producto</DialogTitle></DialogHeader>
@@ -102,11 +120,31 @@ function Products() {
               <Field label="Marca"><Input value={editing.brand ?? ""} onChange={(e) => setEditing({ ...editing, brand: e.target.value })} /></Field>
               <Field label="Modelo"><Input value={editing.model ?? ""} onChange={(e) => setEditing({ ...editing, model: e.target.value })} /></Field>
               <Field label="N° de serie"><Input value={editing.serial_number ?? ""} onChange={(e) => setEditing({ ...editing, serial_number: e.target.value })} /></Field>
-              <Field label="Categoría">
-                <Select value={editing.category} onValueChange={(v) => setEditing({ ...editing, category: v })}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>{CATEGORIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
-                </Select>
+              <Field label="Categoría del catálogo">
+                {addingCat ? (
+                  <div className="flex gap-2">
+                    <Input
+                      autoFocus
+                      placeholder="Nueva categoría (ej. Teclados)"
+                      value={newCat}
+                      onChange={(e) => setNewCat(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); saveNewCategory(); } }}
+                    />
+                    <Button type="button" variant="outline" onClick={saveNewCategory}>Añadir</Button>
+                    <Button type="button" variant="ghost" onClick={() => { setAddingCat(false); setNewCat(""); }}>Cancelar</Button>
+                  </div>
+                ) : (
+                  <Select
+                    value={editing.category}
+                    onValueChange={(v) => (v === NEW_CATEGORY ? setAddingCat(true) : setEditing({ ...editing, category: v }))}
+                  >
+                    <SelectTrigger><SelectValue placeholder="Selecciona una categoría" /></SelectTrigger>
+                    <SelectContent>
+                      {categories.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                      <SelectItem value={NEW_CATEGORY}>➕ Registrar nueva categoría…</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
               </Field>
               <Field label="Estado">
                 <Select value={editing.condition} onValueChange={(v) => setEditing({ ...editing, condition: v })}>

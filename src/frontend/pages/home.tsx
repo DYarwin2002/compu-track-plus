@@ -33,14 +33,31 @@ function Landing() {
   const [cat, setCat] = useState<string>("Todos");
   const [q, setQ] = useState("");
   const [selected, setSelected] = useState<(typeof products)[number] | null>(null);
+  const [quote, setQuote] = useState<string[]>([]);
+
+  const toggleQuote = (id: string) =>
+    setQuote((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
 
   const waLink = (text: string) =>
     `https://wa.me/${BUSINESS.whatsapp}?text=${encodeURIComponent(text)}`;
 
-  const categories = useMemo(
-    () => ["Todos", ...Array.from(new Set(products.map((p) => p.category))).sort()],
-    [products],
-  );
+  const categories = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const p of products) counts.set(p.category, (counts.get(p.category) ?? 0) + 1);
+    return [
+      { name: "Todos", count: products.length },
+      ...Array.from(counts, ([name, count]) => ({ name, count })).sort((a, b) => a.name.localeCompare(b.name)),
+    ];
+  }, [products]);
+
+  const quoteItems = useMemo(() => products.filter((p) => quote.includes(p.id)), [products, quote]);
+  const quoteTotal = quoteItems.reduce((s, p) => s + Number(p.sale_price), 0);
+  const quoteMessage = () =>
+    waLink(
+      `Hola ${BUSINESS.name}, quiero cotizar estos productos:\n` +
+        quoteItems.map((p, i) => `${i + 1}. ${p.name} — ${formatSoles(p.sale_price)}`).join("\n") +
+        `\n\nTotal referencial: ${formatSoles(quoteTotal)}`,
+    );
 
   const filtered = useMemo(() => {
     const term = q.trim().toLowerCase();
@@ -226,15 +243,16 @@ function Landing() {
           <div className="mt-5 flex flex-wrap gap-2">
             {categories.map((c) => (
               <button
-                key={c}
-                onClick={() => setCat(c)}
+                key={c.name}
+                onClick={() => setCat(c.name)}
                 className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${
-                  cat === c
+                  cat === c.name
                     ? "border-primary bg-primary text-primary-foreground"
                     : "border-border bg-background text-muted-foreground hover:text-foreground"
                 }`}
               >
-                {c}
+                {c.name}
+                <span className="ml-1.5 opacity-70">{c.count}</span>
               </button>
             ))}
           </div>
@@ -292,13 +310,49 @@ function Landing() {
                       {p.stock} en stock
                     </span>
                   </div>
-                  <span className="mt-3 text-[11px] font-semibold text-primary">Ver detalle →</span>
+                  <div className="mt-3 flex items-center justify-between gap-2">
+                    <span className="text-[11px] font-semibold text-primary">Ver detalle →</span>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); toggleQuote(p.id); }}
+                      className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold transition-colors ${
+                        quote.includes(p.id)
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : "border-border bg-background text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      {quote.includes(p.id) ? "En cotización" : "+ Cotizar"}
+                    </button>
+                  </div>
                 </article>
               ))}
             </div>
           )}
         </div>
       </section>
+
+      {/* Lista de cotización */}
+      {quoteItems.length > 0 && (
+        <div className="sticky bottom-4 z-40 mx-auto w-[calc(100%-2rem)] max-w-3xl">
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-background/95 p-4 shadow-xl backdrop-blur">
+            <div className="min-w-0">
+              <p className="text-sm font-black">
+                {quoteItems.length} producto{quoteItems.length > 1 ? "s" : ""} en tu cotización
+              </p>
+              <p className="truncate text-xs text-muted-foreground">
+                Total referencial {formatSoles(quoteTotal)} · {quoteItems.map((p) => p.name).join(", ")}
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="ghost" size="sm" onClick={() => setQuote([])}>Vaciar</Button>
+              <Button asChild size="sm" className="font-bold" style={{ background: "var(--gradient-primary)" }}>
+                <a href={quoteMessage()} target="_blank" rel="noreferrer">
+                  <MessageCircle className="mr-2 h-4 w-4" /> Pedir cotización
+                </a>
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Detalle de producto */}
       <Dialog open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>
