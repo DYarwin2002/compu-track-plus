@@ -85,7 +85,7 @@ export async function generateBoletaPDF(data: BoletaData): Promise<jsPDF> {
   const M = 14;
 
   const origin = typeof window !== "undefined" ? window.location.origin : "";
-  const verifyUrl = `${origin}${BUSINESS.portal}?q=${encodeURIComponent(data.sale_number)}`;
+  const verifyUrl = `${origin}${BUSINESS.portal}`;
   const [logo, qr] = await Promise.all([
     toDataUrl(logoServi.url),
     QRCode.toDataURL(verifyUrl, { margin: 0, width: 240 }).catch(() => null),
