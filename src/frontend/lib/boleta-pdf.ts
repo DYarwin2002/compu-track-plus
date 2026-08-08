@@ -211,7 +211,7 @@ export async function generateBoletaPDF(data: BoletaData): Promise<jsPDF> {
     doc.setTextColor(bold ? 17 : 90);
     doc.text(label, tx0, y);
     doc.setTextColor(...DARK);
-    doc.text(val, W - M, y, { align: "right" });
+    doc.text(val, W - M - 2, y, { align: "right" });
   };
   let ty = afterTable + 5;
   row("Op. Gravada", money(data.subtotal), ty);
@@ -225,10 +225,10 @@ export async function generateBoletaPDF(data: BoletaData): Promise<jsPDF> {
   doc.setFont("helvetica", "bold");
   doc.setFontSize(11);
   doc.text("TOTAL A PAGAR", tx0, ty + 7.3);
-  doc.text(money(data.total), W - M, ty + 7.3, { align: "right" });
+  doc.text(money(data.total), W - M - 4, ty + 7.3, { align: "right" });
 
   /* ---------- QR + firma ---------- */
-  const fy = Math.max(afterTable + boxH + 12, 220);
+  const fy = afterTable + boxH + 14;
   if (qr) doc.addImage(qr, "PNG", M, fy, 30, 30);
   doc.setTextColor(120);
   doc.setFont("helvetica", "normal");
