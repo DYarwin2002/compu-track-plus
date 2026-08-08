@@ -1,5 +1,5 @@
 import {Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useAuth } from "@/frontend/hooks/use-auth";
@@ -12,12 +12,14 @@ import { LoginDialog } from "@/frontend/components/login-dialog";
 import heroTienda from "@/assets/hero-tienda.jpg";
 import logoServi from "@/assets/logo-servicompu.jpg.asset.json";
 import { BUSINESS } from "@/frontend/lib/business";
+import { downloadCotizacionPDF } from "@/frontend/lib/cotizacion-pdf";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
 } from "@/frontend/components/ui/dialog";
 import {
   Monitor, ShieldCheck, Zap, Search, Wrench, Truck, CreditCard, Cpu,
   Sparkles, LayoutGrid, Phone, MapPin, Clock, MessageCircle, Package,
+  FileDown,
 } from "lucide-react";
 
 
@@ -34,6 +36,19 @@ function Landing() {
   const [q, setQ] = useState("");
   const [selected, setSelected] = useState<(typeof products)[number] | null>(null);
   const [quote, setQuote] = useState<string[]>([]);
+
+  // La lista de cotización sobrevive a recargas del navegador.
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem("sc-cotizacion");
+      if (raw) setQuote(JSON.parse(raw));
+    } catch { /* almacenamiento no disponible */ }
+  }, []);
+  useEffect(() => {
+    try {
+      localStorage.setItem("sc-cotizacion", JSON.stringify(quote));
+    } catch { /* almacenamiento no disponible */ }
+  }, [quote]);
 
   const toggleQuote = (id: string) =>
     setQuote((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
@@ -344,6 +359,14 @@ function Landing() {
             </div>
             <div className="flex gap-2">
               <Button variant="ghost" size="sm" onClick={() => setQuote([])}>Vaciar</Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="font-bold"
+                onClick={() => downloadCotizacionPDF(quoteItems)}
+              >
+                <FileDown className="mr-2 h-4 w-4" /> Descargar PDF
+              </Button>
               <Button asChild size="sm" className="font-bold" style={{ background: "var(--gradient-primary)" }}>
                 <a href={quoteMessage()} target="_blank" rel="noreferrer">
                   <MessageCircle className="mr-2 h-4 w-4" /> Pedir cotización
