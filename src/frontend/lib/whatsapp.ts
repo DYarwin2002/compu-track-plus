@@ -53,7 +53,7 @@ export function sendBoletaWhatsApp(info: BoletaWhatsAppInfo): boolean {
 /** Sube la boleta al almacenamiento y devuelve un enlace de descarga directa (1 año). */
 export async function uploadBoletaPDF(data: BoletaData): Promise<string | null> {
   try {
-    const blob = generateBoletaPDF(data).output("blob");
+    const blob = (await generateBoletaPDF(data)).output("blob");
     const path = `${new Date().getFullYear()}/Boleta-${data.sale_number}.pdf`;
     const { error } = await supabase.storage
       .from("boletas")
@@ -84,7 +84,7 @@ export async function sendBoletaPDFWhatsApp(data: BoletaData): Promise<SendBolet
 
   // 1) Móvil: compartir el PDF directamente (WhatsApp aparece en el menú de compartir)
   try {
-    const file = new File([generateBoletaPDF(data).output("blob")], `Boleta-${data.sale_number}.pdf`, {
+    const file = new File([(await generateBoletaPDF(data)).output("blob")], `Boleta-${data.sale_number}.pdf`, {
       type: "application/pdf",
     });
     const nav = navigator as Navigator & { canShare?: (d: ShareData) => boolean };
