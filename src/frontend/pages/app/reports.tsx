@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/database/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/frontend/components/ui/card";
 import { Button } from "@/frontend/components/ui/button";
-import { Download, TrendingUp, Package, ShieldCheck } from "lucide-react";
+import { Download, TrendingUp, Package, Truck, PackageCheck } from "lucide-react";
 import { formatSoles, formatDate } from "@/frontend/lib/format";
 import { useAuth } from "@/frontend/hooks/use-auth";
 
