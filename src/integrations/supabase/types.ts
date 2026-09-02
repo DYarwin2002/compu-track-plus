@@ -90,6 +90,7 @@ export type Database = {
         Row: {
           brand: string | null
           category: string
+          color: string | null
           condition: Database["public"]["Enums"]["product_condition"]
           created_at: string
           default_warranty_months: number
@@ -100,6 +101,7 @@ export type Database = {
           purchase_price: number
           sale_price: number
           serial_number: string | null
+          size: string | null
           sku: string
           stock: number
           updated_at: string
@@ -107,6 +109,7 @@ export type Database = {
         Insert: {
           brand?: string | null
           category: string
+          color?: string | null
           condition?: Database["public"]["Enums"]["product_condition"]
           created_at?: string
           default_warranty_months?: number
@@ -117,6 +120,7 @@ export type Database = {
           purchase_price?: number
           sale_price?: number
           serial_number?: string | null
+          size?: string | null
           sku: string
           stock?: number
           updated_at?: string
@@ -124,6 +128,7 @@ export type Database = {
         Update: {
           brand?: string | null
           category?: string
+          color?: string | null
           condition?: Database["public"]["Enums"]["product_condition"]
           created_at?: string
           default_warranty_months?: number
@@ -134,6 +139,7 @@ export type Database = {
           purchase_price?: number
           sale_price?: number
           serial_number?: string | null
+          size?: string | null
           sku?: string
           stock?: number
           updated_at?: string
@@ -217,83 +223,6 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
-      }
-      repairs: {
-        Row: {
-          accessories: string | null
-          brand: string | null
-          cost_estimate: number
-          cost_final: number
-          created_at: string
-          created_by: string | null
-          customer_id: string | null
-          delivered_at: string | null
-          device: string
-          diagnosis: string | null
-          id: string
-          internal_notes: string | null
-          model: string | null
-          order_number: string
-          received_at: string
-          reported_issue: string
-          serial_number: string | null
-          status: Database["public"]["Enums"]["repair_status"]
-          technician: string | null
-          updated_at: string
-        }
-        Insert: {
-          accessories?: string | null
-          brand?: string | null
-          cost_estimate?: number
-          cost_final?: number
-          created_at?: string
-          created_by?: string | null
-          customer_id?: string | null
-          delivered_at?: string | null
-          device: string
-          diagnosis?: string | null
-          id?: string
-          internal_notes?: string | null
-          model?: string | null
-          order_number: string
-          received_at?: string
-          reported_issue: string
-          serial_number?: string | null
-          status?: Database["public"]["Enums"]["repair_status"]
-          technician?: string | null
-          updated_at?: string
-        }
-        Update: {
-          accessories?: string | null
-          brand?: string | null
-          cost_estimate?: number
-          cost_final?: number
-          created_at?: string
-          created_by?: string | null
-          customer_id?: string | null
-          delivered_at?: string | null
-          device?: string
-          diagnosis?: string | null
-          id?: string
-          internal_notes?: string | null
-          model?: string | null
-          order_number?: string
-          received_at?: string
-          reported_issue?: string
-          serial_number?: string | null
-          status?: Database["public"]["Enums"]["repair_status"]
-          technician?: string | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "repairs_customer_id_fkey"
-            columns: ["customer_id"]
-            isOneToOne: false
-            referencedRelation: "customers"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       role_permissions: {
         Row: {
@@ -414,6 +343,7 @@ export type Database = {
           id: string
           igv: number
           notes: string | null
+          order_status: string
           payment_method: Database["public"]["Enums"]["payment_method"]
           sale_date: string
           sale_number: string
@@ -428,6 +358,7 @@ export type Database = {
           id?: string
           igv?: number
           notes?: string | null
+          order_status?: string
           payment_method?: Database["public"]["Enums"]["payment_method"]
           sale_date?: string
           sale_number?: string
@@ -442,6 +373,7 @@ export type Database = {
           id?: string
           igv?: number
           notes?: string | null
+          order_status?: string
           payment_method?: Database["public"]["Enums"]["payment_method"]
           sale_date?: string
           sale_number?: string
@@ -484,79 +416,6 @@ export type Database = {
           },
         ]
       }
-      warranties: {
-        Row: {
-          created_at: string
-          created_by: string | null
-          customer_id: string | null
-          duration_months: number
-          expires_at: string
-          id: string
-          notes: string | null
-          product_name: string
-          sale_date: string
-          sale_id: string
-          sale_item_id: string | null
-          serial_number: string | null
-          status: Database["public"]["Enums"]["warranty_status"]
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          created_by?: string | null
-          customer_id?: string | null
-          duration_months: number
-          expires_at: string
-          id?: string
-          notes?: string | null
-          product_name: string
-          sale_date: string
-          sale_id: string
-          sale_item_id?: string | null
-          serial_number?: string | null
-          status?: Database["public"]["Enums"]["warranty_status"]
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          created_by?: string | null
-          customer_id?: string | null
-          duration_months?: number
-          expires_at?: string
-          id?: string
-          notes?: string | null
-          product_name?: string
-          sale_date?: string
-          sale_id?: string
-          sale_item_id?: string | null
-          serial_number?: string | null
-          status?: Database["public"]["Enums"]["warranty_status"]
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "warranties_customer_id_fkey"
-            columns: ["customer_id"]
-            isOneToOne: false
-            referencedRelation: "customers"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "warranties_sale_id_fkey"
-            columns: ["sale_id"]
-            isOneToOne: false
-            referencedRelation: "sales"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "warranties_sale_item_id_fkey"
-            columns: ["sale_item_id"]
-            isOneToOne: false
-            referencedRelation: "sale_items"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
     }
     Views: {
       [_ in never]: never
@@ -567,19 +426,10 @@ export type Database = {
         Returns: boolean
       }
       has_role: { Args: { _role: string; _user_id: string }; Returns: boolean }
-      refresh_warranty_statuses: { Args: never; Returns: undefined }
     }
     Enums: {
       payment_method: "Efectivo" | "Yape" | "Transferencia" | "Tarjeta"
       product_condition: "Nuevo" | "Usado" | "Reacondicionado"
-      repair_status:
-        | "Recibido"
-        | "Diagnostico"
-        | "En reparacion"
-        | "Listo"
-        | "Entregado"
-        | "Cancelado"
-      warranty_status: "Activa" | "Próxima a vencer" | "Vencida" | "Anulada"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -709,15 +559,6 @@ export const Constants = {
     Enums: {
       payment_method: ["Efectivo", "Yape", "Transferencia", "Tarjeta"],
       product_condition: ["Nuevo", "Usado", "Reacondicionado"],
-      repair_status: [
-        "Recibido",
-        "Diagnostico",
-        "En reparacion",
-        "Listo",
-        "Entregado",
-        "Cancelado",
-      ],
-      warranty_status: ["Activa", "Próxima a vencer", "Vencida", "Anulada"],
     },
   },
 } as const
