@@ -1,7 +1,7 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { LayoutDashboard, Package, Users, ShoppingCart, ShieldCheck, BarChart3, Search, LogOut, UserCog, ScrollText, Wrench, Shield, Truck } from "lucide-react";
+import { LayoutDashboard, Package, Users, ShoppingCart, BarChart3, Search, LogOut, UserCog, ScrollText, Shield, Truck } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -17,7 +17,7 @@ import {
 } from "@/frontend/components/ui/sidebar";
 import { useAuth } from "@/frontend/hooks/use-auth";
 import { Button } from "./ui/button";
-import logoServi from "@/assets/logo-servicompu.jpg.asset.json";
+import logoSebas from "@/assets/logo-sebas-urban.jpg.asset.json";
 
 import type { Permission } from "@/frontend/lib/permissions";
 
@@ -30,8 +30,6 @@ const items: NavItem[] = [
   { title: "Productos", url: "/products", icon: Package, permission: "products.view" },
   { title: "Compras", url: "/purchases", icon: Truck, adminOnly: true },
   { title: "Clientes", url: "/customers", icon: Users, permission: "customers.view" },
-  { title: "Garantías", url: "/warranties", icon: ShieldCheck, permission: "warranties.view" },
-  { title: "Servicio técnico", url: "/repairs", icon: Wrench, permission: "repairs.view" },
   { title: "Reportes", url: "/reports", icon: BarChart3, permission: "reports.view" },
   { title: "Usuarios", url: "/admin/users", icon: UserCog, adminOnly: true },
   { title: "Roles y permisos", url: "/admin/roles", icon: Shield, adminOnly: true },
@@ -63,14 +61,14 @@ export function AppSidebar() {
       <SidebarHeader>
         <div className="flex items-center gap-2 px-2 py-2">
           <img
-            src={logoServi.url}
-            alt="Logo ServiCompu Yarango"
-            className="h-8 w-8 shrink-0 rounded-lg bg-white object-contain p-0.5"
+            src={logoSebas.url}
+            alt="Logo Sebas Urban"
+            className="h-8 w-8 shrink-0 rounded-lg bg-black object-contain"
           />
           {!collapsed && (
             <div className="min-w-0">
-              <div className="truncate text-sm font-black leading-tight">ServiCompu</div>
-              <div className="truncate text-[10px] uppercase tracking-widest text-muted-foreground">Yarango</div>
+              <div className="truncate text-sm font-black leading-tight">Sebas Urban</div>
+              <div className="truncate text-[10px] uppercase tracking-widest text-muted-foreground">Streetwear</div>
             </div>
           )}
         </div>

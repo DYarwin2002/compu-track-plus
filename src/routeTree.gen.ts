@@ -14,16 +14,13 @@ import { Route as ConsultarRouteImport } from './routes/consultar'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AuthenticatedWarrantiesRouteImport } from './routes/_authenticated/warranties'
 import { Route as AuthenticatedReportsRouteImport } from './routes/_authenticated/reports'
-import { Route as AuthenticatedRepairsRouteImport } from './routes/_authenticated/repairs'
 import { Route as AuthenticatedPurchasesRouteImport } from './routes/_authenticated/purchases'
 import { Route as AuthenticatedProductsRouteImport } from './routes/_authenticated/products'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedCustomersRouteImport } from './routes/_authenticated/customers'
 import { Route as AuthenticatedAdminRouteRouteImport } from './routes/_authenticated/admin/route'
 import { Route as AuthenticatedSalesIndexRouteImport } from './routes/_authenticated/sales.index'
-import { Route as ApiPublicWarrantiesRouteImport } from './routes/api/public/warranties'
 import { Route as ApiPublicCatalogRouteImport } from './routes/api/public/catalog'
 import { Route as AuthenticatedSalesNewRouteImport } from './routes/_authenticated/sales.new'
 import { Route as AuthenticatedSalesIdRouteImport } from './routes/_authenticated/sales.$id'
@@ -55,19 +52,9 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedWarrantiesRoute = AuthenticatedWarrantiesRouteImport.update({
-  id: '/warranties',
-  path: '/warranties',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
 const AuthenticatedReportsRoute = AuthenticatedReportsRouteImport.update({
   id: '/reports',
   path: '/reports',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedRepairsRoute = AuthenticatedRepairsRouteImport.update({
-  id: '/repairs',
-  path: '/repairs',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedPurchasesRoute = AuthenticatedPurchasesRouteImport.update({
@@ -99,11 +86,6 @@ const AuthenticatedSalesIndexRoute = AuthenticatedSalesIndexRouteImport.update({
   id: '/sales/',
   path: '/sales/',
   getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const ApiPublicWarrantiesRoute = ApiPublicWarrantiesRouteImport.update({
-  id: '/api/public/warranties',
-  path: '/api/public/warranties',
-  getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicCatalogRoute = ApiPublicCatalogRouteImport.update({
   id: '/api/public/catalog',
@@ -146,16 +128,13 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/products': typeof AuthenticatedProductsRoute
   '/purchases': typeof AuthenticatedPurchasesRoute
-  '/repairs': typeof AuthenticatedRepairsRoute
   '/reports': typeof AuthenticatedReportsRoute
-  '/warranties': typeof AuthenticatedWarrantiesRoute
   '/admin/audit': typeof AuthenticatedAdminAuditRoute
   '/admin/roles': typeof AuthenticatedAdminRolesRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/sales/$id': typeof AuthenticatedSalesIdRoute
   '/sales/new': typeof AuthenticatedSalesNewRoute
   '/api/public/catalog': typeof ApiPublicCatalogRoute
-  '/api/public/warranties': typeof ApiPublicWarrantiesRoute
   '/sales/': typeof AuthenticatedSalesIndexRoute
 }
 export interface FileRoutesByTo {
@@ -168,16 +147,13 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/products': typeof AuthenticatedProductsRoute
   '/purchases': typeof AuthenticatedPurchasesRoute
-  '/repairs': typeof AuthenticatedRepairsRoute
   '/reports': typeof AuthenticatedReportsRoute
-  '/warranties': typeof AuthenticatedWarrantiesRoute
   '/admin/audit': typeof AuthenticatedAdminAuditRoute
   '/admin/roles': typeof AuthenticatedAdminRolesRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/sales/$id': typeof AuthenticatedSalesIdRoute
   '/sales/new': typeof AuthenticatedSalesNewRoute
   '/api/public/catalog': typeof ApiPublicCatalogRoute
-  '/api/public/warranties': typeof ApiPublicWarrantiesRoute
   '/sales': typeof AuthenticatedSalesIndexRoute
 }
 export interface FileRoutesById {
@@ -192,16 +168,13 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/products': typeof AuthenticatedProductsRoute
   '/_authenticated/purchases': typeof AuthenticatedPurchasesRoute
-  '/_authenticated/repairs': typeof AuthenticatedRepairsRoute
   '/_authenticated/reports': typeof AuthenticatedReportsRoute
-  '/_authenticated/warranties': typeof AuthenticatedWarrantiesRoute
   '/_authenticated/admin/audit': typeof AuthenticatedAdminAuditRoute
   '/_authenticated/admin/roles': typeof AuthenticatedAdminRolesRoute
   '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
   '/_authenticated/sales/$id': typeof AuthenticatedSalesIdRoute
   '/_authenticated/sales/new': typeof AuthenticatedSalesNewRoute
   '/api/public/catalog': typeof ApiPublicCatalogRoute
-  '/api/public/warranties': typeof ApiPublicWarrantiesRoute
   '/_authenticated/sales/': typeof AuthenticatedSalesIndexRoute
 }
 export interface FileRouteTypes {
@@ -216,16 +189,13 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/products'
     | '/purchases'
-    | '/repairs'
     | '/reports'
-    | '/warranties'
     | '/admin/audit'
     | '/admin/roles'
     | '/admin/users'
     | '/sales/$id'
     | '/sales/new'
     | '/api/public/catalog'
-    | '/api/public/warranties'
     | '/sales/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -238,16 +208,13 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/products'
     | '/purchases'
-    | '/repairs'
     | '/reports'
-    | '/warranties'
     | '/admin/audit'
     | '/admin/roles'
     | '/admin/users'
     | '/sales/$id'
     | '/sales/new'
     | '/api/public/catalog'
-    | '/api/public/warranties'
     | '/sales'
   id:
     | '__root__'
@@ -261,16 +228,13 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/products'
     | '/_authenticated/purchases'
-    | '/_authenticated/repairs'
     | '/_authenticated/reports'
-    | '/_authenticated/warranties'
     | '/_authenticated/admin/audit'
     | '/_authenticated/admin/roles'
     | '/_authenticated/admin/users'
     | '/_authenticated/sales/$id'
     | '/_authenticated/sales/new'
     | '/api/public/catalog'
-    | '/api/public/warranties'
     | '/_authenticated/sales/'
   fileRoutesById: FileRoutesById
 }
@@ -281,7 +245,6 @@ export interface RootRouteChildren {
   ConsultarRoute: typeof ConsultarRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ApiPublicCatalogRoute: typeof ApiPublicCatalogRoute
-  ApiPublicWarrantiesRoute: typeof ApiPublicWarrantiesRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -321,25 +284,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/warranties': {
-      id: '/_authenticated/warranties'
-      path: '/warranties'
-      fullPath: '/warranties'
-      preLoaderRoute: typeof AuthenticatedWarrantiesRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
     '/_authenticated/reports': {
       id: '/_authenticated/reports'
       path: '/reports'
       fullPath: '/reports'
       preLoaderRoute: typeof AuthenticatedReportsRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/repairs': {
-      id: '/_authenticated/repairs'
-      path: '/repairs'
-      fullPath: '/repairs'
-      preLoaderRoute: typeof AuthenticatedRepairsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/purchases': {
@@ -383,13 +332,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/sales/'
       preLoaderRoute: typeof AuthenticatedSalesIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/api/public/warranties': {
-      id: '/api/public/warranties'
-      path: '/api/public/warranties'
-      fullPath: '/api/public/warranties'
-      preLoaderRoute: typeof ApiPublicWarrantiesRouteImport
-      parentRoute: typeof rootRouteImport
     }
     '/api/public/catalog': {
       id: '/api/public/catalog'
@@ -460,9 +402,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedProductsRoute: typeof AuthenticatedProductsRoute
   AuthenticatedPurchasesRoute: typeof AuthenticatedPurchasesRoute
-  AuthenticatedRepairsRoute: typeof AuthenticatedRepairsRoute
   AuthenticatedReportsRoute: typeof AuthenticatedReportsRoute
-  AuthenticatedWarrantiesRoute: typeof AuthenticatedWarrantiesRoute
   AuthenticatedSalesIdRoute: typeof AuthenticatedSalesIdRoute
   AuthenticatedSalesNewRoute: typeof AuthenticatedSalesNewRoute
   AuthenticatedSalesIndexRoute: typeof AuthenticatedSalesIndexRoute
@@ -474,9 +414,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedProductsRoute: AuthenticatedProductsRoute,
   AuthenticatedPurchasesRoute: AuthenticatedPurchasesRoute,
-  AuthenticatedRepairsRoute: AuthenticatedRepairsRoute,
   AuthenticatedReportsRoute: AuthenticatedReportsRoute,
-  AuthenticatedWarrantiesRoute: AuthenticatedWarrantiesRoute,
   AuthenticatedSalesIdRoute: AuthenticatedSalesIdRoute,
   AuthenticatedSalesNewRoute: AuthenticatedSalesNewRoute,
   AuthenticatedSalesIndexRoute: AuthenticatedSalesIndexRoute,
@@ -492,7 +430,6 @@ const rootRouteChildren: RootRouteChildren = {
   ConsultarRoute: ConsultarRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   ApiPublicCatalogRoute: ApiPublicCatalogRoute,
-  ApiPublicWarrantiesRoute: ApiPublicWarrantiesRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
