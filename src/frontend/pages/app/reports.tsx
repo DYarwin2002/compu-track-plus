@@ -47,8 +47,8 @@ function Reports() {
       const [{ count: cAll }, { data: rev }, { count: cAct }, { count: cExp }] = await Promise.all([
         supabase.from("sales").select("id", { count: "exact", head: true }),
         supabase.from("sales").select("total"),
-        supabase.from("warranties").select("id", { count: "exact", head: true }).eq("status", "Activa"),
-        supabase.from("warranties").select("id", { count: "exact", head: true }).eq("status", "Vencida"),
+        supabase.from("sales").select("id", { count: "exact", head: true }).neq("order_status", "Entregado").neq("order_status", "Cancelado"),
+        supabase.from("sales").select("id", { count: "exact", head: true }).eq("order_status", "Entregado"),
       ]);
       const revenue = (rev ?? []).reduce((s, r) => s + Number(r.total), 0);
       setTotals({ revenue, count: cAll ?? 0, active: cAct ?? 0, expired: cExp ?? 0 });
@@ -65,13 +65,13 @@ function Reports() {
 
   return (
     <div className="space-y-6">
-      <div><h1 className="text-2xl font-black">Reportes</h1><p className="text-sm text-muted-foreground">Análisis de ventas, productos y garantías.</p></div>
+      <div><h1 className="text-2xl font-black">Reportes</h1><p className="text-sm text-muted-foreground">Análisis de ventas, productos y pedidos.</p></div>
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <KpiCard icon={TrendingUp} title="Ingresos totales" value={formatSoles(totals.revenue)} />
         <KpiCard icon={Package} title="Ventas totales" value={totals.count} />
-        <KpiCard icon={ShieldCheck} title="Garantías activas" value={totals.active} />
-        <KpiCard icon={ShieldCheck} title="Garantías vencidas" value={totals.expired} />
+        <KpiCard icon={Truck} title="Pedidos en curso" value={totals.active} />
+        <KpiCard icon={PackageCheck} title="Pedidos entregados" value={totals.expired} />
       </div>
 
       <Card>

@@ -7,10 +7,6 @@ export type Permission =
   | "products.view"
   | "products.manage"
   | "products.view_cost"
-  | "warranties.view"
-  | "warranties.manage"
-  | "repairs.view"
-  | "repairs.manage"
   | "reports.view"
   | "reports.export"
   | "dashboard.view_global";
@@ -40,20 +36,6 @@ export const PERMISSION_GROUPS: {
       { key: "products.view", label: "Ver productos" },
       { key: "products.manage", label: "Crear / editar productos y stock" },
       { key: "products.view_cost", label: "Ver costos de compra" },
-    ],
-  },
-  {
-    label: "Garantías",
-    items: [
-      { key: "warranties.view", label: "Ver garantías" },
-      { key: "warranties.manage", label: "Editar garantías" },
-    ],
-  },
-  {
-    label: "Servicio técnico",
-    items: [
-      { key: "repairs.view", label: "Ver órdenes de trabajo" },
-      { key: "repairs.manage", label: "Crear / editar órdenes" },
     ],
   },
   {
