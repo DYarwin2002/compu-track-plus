@@ -31,9 +31,8 @@ export function buildBoletaMessage(info: BoletaWhatsAppInfo): string {
     "",
     `🧾 Boleta: *${info.sale_number}*`,
     `💵 Total: *${total}*`,
-    `🛡️ Garantía: 12 meses desde la fecha de venta`,
     "",
-    `Descarga tu boleta y revisa tus garantías aquí:`,
+    `Sigue tu pedido y descarga tu boleta aquí:`,
     portal,
     info.customer_document ? `Ingresa con tu DNI: ${info.customer_document}` : "",
   ]
