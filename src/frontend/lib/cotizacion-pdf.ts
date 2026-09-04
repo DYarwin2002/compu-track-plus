@@ -8,7 +8,8 @@ export type CotizacionItem = {
   model?: string | null;
   category?: string | null;
   sale_price: number;
-  default_warranty_months?: number | null;
+  size?: string | null;
+  color?: string | null;
 };
 
 const money = (n: number) =>
@@ -22,7 +23,7 @@ export function generateCotizacionPDF(items: CotizacionItem[]): jsPDF {
   const valid = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
   const code = "COT-" + now.getTime().toString(36).toUpperCase().slice(-8);
 
-  doc.setFillColor(37, 99, 235);
+  doc.setFillColor(18, 18, 18);
   doc.rect(0, 0, W, 26, "F");
   doc.setTextColor(255, 255, 255);
   doc.setFont("helvetica", "bold");
@@ -49,16 +50,16 @@ export function generateCotizacionPDF(items: CotizacionItem[]): jsPDF {
 
   autoTable(doc, {
     startY: 45,
-    head: [["#", "Producto", "Detalle", "Garantia", "Precio"]],
+    head: [["#", "Producto", "Detalle", "Talla", "Precio"]],
     body: items.map((i, n) => [
       String(n + 1),
       i.name,
       [i.brand, i.model, i.category].filter(Boolean).join(" · ") || "-",
-      `${i.default_warranty_months ?? 12} meses`,
+      [i.size, i.color].filter(Boolean).join(" / ") || "-",
       money(i.sale_price),
     ]),
     styles: { fontSize: 9, cellPadding: 2.5, valign: "top" },
-    headStyles: { fillColor: [30, 30, 40], textColor: 255, halign: "left" },
+    headStyles: { fillColor: [176, 137, 60], textColor: 255, halign: "left" },
     columnStyles: {
       0: { halign: "center", cellWidth: 10 },
       3: { halign: "center", cellWidth: 24 },
@@ -80,7 +81,7 @@ export function generateCotizacionPDF(items: CotizacionItem[]): jsPDF {
   doc.setFontSize(8);
   doc.setTextColor(110);
   doc.text("Documento informativo, no valido como comprobante de pago.", W / 2, 285, { align: "center" });
-  doc.text("Consulta garantias y boletas en el portal de clientes.", W / 2, 290, { align: "center" });
+  doc.text("Consulta el estado de tu pedido y descarga tu boleta en el portal de clientes.", W / 2, 290, { align: "center" });
 
   return doc;
 }

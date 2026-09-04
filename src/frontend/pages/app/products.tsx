@@ -20,15 +20,16 @@ import { useAlert } from "@/frontend/components/alert-modal";
 
 type Product = {
   id: string; sku: string; name: string; brand: string | null; model: string | null; serial_number: string | null;
-  category: string; purchase_price: number; sale_price: number; stock: number; condition: string; default_warranty_months: number;
+  category: string; purchase_price: number; sale_price: number; stock: number; condition: string; size: string | null; color: string | null;
   image_url: string | null;
 };
 
-const BASE_CATEGORIES = ["Laptop", "PC", "Monitor", "Impresora", "SSD", "RAM", "Accesorio", "Otro"];
+const BASE_CATEGORIES = ["Zapatillas", "Polos", "Camisas", "Pantalones", "Shorts", "Casacas", "Hoodies", "Gorras", "Accesorios"];
 const NEW_CATEGORY = "__nueva__";
 const CONDITIONS = ["Nuevo", "Usado", "Reacondicionado"];
+const SIZES = ["XS", "S", "M", "L", "XL", "XXL", "35", "36", "37", "38", "39", "40", "41", "42", "43", "44", "Única"];
 
-const empty: Partial<Product> = { sku: "", name: "", brand: "", model: "", serial_number: "", category: "Laptop", purchase_price: 0, sale_price: 0, stock: 1, condition: "Nuevo", default_warranty_months: 12, image_url: null };
+const empty: Partial<Product> = { sku: "", name: "", brand: "", model: "", serial_number: "", category: "Zapatillas", purchase_price: 0, sale_price: 0, stock: 1, condition: "Nuevo", size: "", color: "", image_url: null };
 
 function Products() {
   const { role, can } = useAuth();
@@ -86,7 +87,7 @@ function Products() {
         description: "Ingresa un precio de venta mayor a cero.",
       });
     }
-    const payload = { ...editing, category, purchase_price: Number(editing.purchase_price) || 0, sale_price: Number(editing.sale_price) || 0, stock: Number(editing.stock) || 0, default_warranty_months: Number(editing.default_warranty_months) || 12 };
+    const payload = { ...editing, category, purchase_price: Number(editing.purchase_price) || 0, sale_price: Number(editing.sale_price) || 0, stock: Number(editing.stock) || 0 };
     const { error } = editing.id
       ? await supabase.from("products").update(payload as never).eq("id", editing.id)
       : await supabase.from("products").insert(payload as never);
@@ -109,7 +110,7 @@ function Products() {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <div><h1 className="text-2xl font-black">Productos</h1><p className="text-sm text-muted-foreground">Inventario y control de stock.</p></div>
+        <div><h1 className="text-2xl font-black">Productos</h1><p className="text-sm text-muted-foreground">Inventario de prendas y zapatillas.</p></div>
         {canManage && <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) { setEditing(empty); setAddingCat(false); setNewCat(""); } }}>
           <DialogTrigger asChild><Button><Plus className="mr-2 h-4 w-4" /> Nuevo producto</Button></DialogTrigger>
           <DialogContent className="max-w-2xl">
@@ -119,7 +120,7 @@ function Products() {
               <Field label="Nombre *"><Input value={editing.name ?? ""} onChange={(e) => setEditing({ ...editing, name: e.target.value })} /></Field>
               <Field label="Marca"><Input value={editing.brand ?? ""} onChange={(e) => setEditing({ ...editing, brand: e.target.value })} /></Field>
               <Field label="Modelo"><Input value={editing.model ?? ""} onChange={(e) => setEditing({ ...editing, model: e.target.value })} /></Field>
-              <Field label="N° de serie"><Input value={editing.serial_number ?? ""} onChange={(e) => setEditing({ ...editing, serial_number: e.target.value })} /></Field>
+              <Field label="Código / N° de serie"><Input value={editing.serial_number ?? ""} onChange={(e) => setEditing({ ...editing, serial_number: e.target.value })} /></Field>
               <Field label="Categoría del catálogo">
                 {addingCat ? (
                   <div className="flex gap-2">
@@ -155,7 +156,13 @@ function Products() {
               {canViewCost && <Field label="Precio de compra"><Input type="number" step="0.01" value={editing.purchase_price ?? 0} onChange={(e) => setEditing({ ...editing, purchase_price: parseFloat(e.target.value) })} /></Field>}
               <Field label="Precio de venta *"><Input type="number" step="0.01" value={editing.sale_price ?? 0} onChange={(e) => setEditing({ ...editing, sale_price: parseFloat(e.target.value) })} /></Field>
               <Field label="Stock"><Input type="number" value={editing.stock ?? 0} onChange={(e) => setEditing({ ...editing, stock: parseInt(e.target.value) })} /></Field>
-              <Field label="Garantía (meses)"><Input type="number" value={editing.default_warranty_months ?? 12} onChange={(e) => setEditing({ ...editing, default_warranty_months: parseInt(e.target.value) })} /></Field>
+              <Field label="Talla">
+                <Select value={editing.size || undefined} onValueChange={(v) => setEditing({ ...editing, size: v })}>
+                  <SelectTrigger><SelectValue placeholder="Selecciona la talla" /></SelectTrigger>
+                  <SelectContent>{SIZES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+                </Select>
+              </Field>
+              <Field label="Color"><Input placeholder="Ej. Negro / Beige" value={editing.color ?? ""} onChange={(e) => setEditing({ ...editing, color: e.target.value })} /></Field>
               <div className="sm:col-span-2">
                 <Field label="Foto para el catálogo">
                   <MediaUpload folder="products" value={editing.image_url} onChange={(p) => setEditing({ ...editing, image_url: p })} />
@@ -176,7 +183,7 @@ function Products() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Foto</TableHead><TableHead>SKU</TableHead><TableHead>Producto</TableHead><TableHead>Serie</TableHead>
+              <TableHead>Foto</TableHead><TableHead>SKU</TableHead><TableHead>Producto</TableHead><TableHead>Talla / Color</TableHead>
               <TableHead>Categoría</TableHead><TableHead className="text-right">Precio</TableHead>
               <TableHead className="text-right">Stock</TableHead><TableHead>Estado</TableHead><TableHead></TableHead>
             </TableRow>
@@ -193,7 +200,7 @@ function Products() {
                 </TableCell>
                 <TableCell className="font-mono text-xs">{p.sku}</TableCell>
                 <TableCell><div className="font-medium">{p.name}</div><div className="text-xs text-muted-foreground">{p.brand} {p.model}</div></TableCell>
-                <TableCell className="font-mono text-xs">{p.serial_number ?? "—"}</TableCell>
+                <TableCell className="text-xs">{[p.size, p.color].filter(Boolean).join(" · ") || "—"}</TableCell>
                 <TableCell>{p.category}</TableCell>
                 <TableCell className="text-right font-medium">{formatSoles(p.sale_price)}</TableCell>
                 <TableCell className="text-right"><Badge variant={p.stock === 0 ? "destructive" : p.stock < 3 ? "secondary" : "default"}>{p.stock}</Badge></TableCell>

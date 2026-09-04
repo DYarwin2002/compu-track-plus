@@ -18,9 +18,9 @@ import { useAlert } from "@/frontend/components/alert-modal";
 
 
 
-type Product = { id: string; name: string; sku: string; sale_price: number; stock: number; serial_number: string | null; default_warranty_months: number };
+type Product = { id: string; name: string; sku: string; sale_price: number; stock: number; serial_number: string | null };
 type Customer = { id: string; document: string; full_name: string; phone?: string | null };
-type LineItem = { key: string; product_id: string | null; product_name: string; serial_number: string; quantity: number; unit_price: number; warranty_months: number };
+type LineItem = { key: string; product_id: string | null; product_name: string; serial_number: string; quantity: number; unit_price: number };
 
 function NewSale() {
   const nav = useNavigate();
@@ -42,14 +42,13 @@ function NewSale() {
 
   useEffect(() => {
     supabase.from("customers").select("id, document, full_name, phone").order("full_name").then(({ data }) => setCustomers((data ?? []) as Customer[]));
-    supabase.from("products").select("id, name, sku, sale_price, stock, serial_number, default_warranty_months").gt("stock", 0).order("name").then(({ data }) => setProducts((data ?? []) as Product[]));
+    supabase.from("products").select("id, name, sku, sale_price, stock, serial_number").gt("stock", 0).order("name").then(({ data }) => setProducts((data ?? []) as Product[]));
   }, []);
 
   const addProduct = (p: Product) => {
     setItems((x) => [...x, {
       key: crypto.randomUUID(), product_id: p.id, product_name: p.name,
       serial_number: p.serial_number ?? "", quantity: 1, unit_price: Number(p.sale_price),
-      warranty_months: 12, // Garantía fija de 1 año desde la fecha de venta
     }]);
     setOpenProduct(false);
   };
@@ -96,7 +95,7 @@ function NewSale() {
     const payload = items.map((i) => ({
       sale_id: sale.id, product_id: i.product_id, product_name: i.product_name,
       serial_number: i.serial_number || null, quantity: i.quantity, unit_price: i.unit_price,
-      line_total: i.quantity * i.unit_price, warranty_months: i.warranty_months,
+      line_total: i.quantity * i.unit_price,
     }));
     const { error: itemsErr } = await supabase.from("sale_items").insert(payload);
     setSaving(false);
@@ -149,20 +148,19 @@ function NewSale() {
           </CardHeader>
           <CardContent>
             <Table>
-              <TableHeader><TableRow><TableHead>Producto</TableHead><TableHead>Serie</TableHead><TableHead>Cant.</TableHead><TableHead>Precio</TableHead><TableHead>Garantía</TableHead><TableHead className="text-right">Total</TableHead><TableHead></TableHead></TableRow></TableHeader>
+              <TableHeader><TableRow><TableHead>Producto</TableHead><TableHead>Código</TableHead><TableHead>Cant.</TableHead><TableHead>Precio</TableHead><TableHead className="text-right">Total</TableHead><TableHead></TableHead></TableRow></TableHeader>
               <TableBody>
                 {items.map((i) => (
                   <TableRow key={i.key}>
                     <TableCell className="font-medium">{i.product_name}</TableCell>
-                    <TableCell><Input value={i.serial_number} onChange={(e) => updateItem(i.key, { serial_number: e.target.value })} placeholder="N° serie" className="h-8 w-32 font-mono text-xs" /></TableCell>
+                    <TableCell><Input value={i.serial_number} onChange={(e) => updateItem(i.key, { serial_number: e.target.value })} placeholder="Código" className="h-8 w-32 font-mono text-xs" /></TableCell>
                     <TableCell><Input type="number" min={1} value={i.quantity} onChange={(e) => updateItem(i.key, { quantity: parseInt(e.target.value) || 1 })} className="h-8 w-16" /></TableCell>
                     <TableCell><Input type="number" step="0.01" value={i.unit_price} onChange={(e) => updateItem(i.key, { unit_price: parseFloat(e.target.value) || 0 })} className="h-8 w-24" /></TableCell>
-                    <TableCell className="whitespace-nowrap text-sm text-muted-foreground">1 año</TableCell>
                     <TableCell className="text-right font-bold">{formatSoles(i.quantity * i.unit_price)}</TableCell>
                     <TableCell><Button size="icon" variant="ghost" onClick={() => removeItem(i.key)}><Trash2 className="h-4 w-4" /></Button></TableCell>
                   </TableRow>
                 ))}
-                {items.length === 0 && <TableRow><TableCell colSpan={7} className="py-8 text-center text-muted-foreground">Agrega productos</TableCell></TableRow>}
+                {items.length === 0 && <TableRow><TableCell colSpan={6} className="py-8 text-center text-muted-foreground">Agrega productos</TableCell></TableRow>}
               </TableBody>
             </Table>
           </CardContent>

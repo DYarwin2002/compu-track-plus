@@ -56,7 +56,7 @@ function Customers() {
   const removeCustomer = async (c: C) => {
     if (!(await confirm({
       title: `¿Eliminar a ${c.full_name}?`,
-      description: "Sus ventas y garantías quedarán sin cliente asignado.",
+      description: "Sus pedidos quedarán sin cliente asignado.",
       confirmText: "Eliminar cliente",
       destructive: true,
     }))) return;

@@ -2,7 +2,7 @@ import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import QRCode from "qrcode";
 import { BUSINESS } from "./business";
-import logoServi from "@/assets/logo-servicompu.jpg.asset.json";
+import logoServi from "@/assets/logo-sebas-urban.jpg.asset.json";
 
 export type BoletaData = {
   sale_number: string;
@@ -19,7 +19,6 @@ export type BoletaData = {
     quantity: number;
     unit_price: number;
     line_total: number;
-    warranty_months: number;
   }>;
 };
 
@@ -74,8 +73,8 @@ export function montoEnLetras(total: number): string {
   return `SON: ${texto} CON ${String(centimos).padStart(2, "0")}/100 SOLES`;
 }
 
-const BLUE: [number, number, number] = [37, 99, 235];
-const DARK: [number, number, number] = [17, 24, 39];
+const BLUE: [number, number, number] = [176, 137, 60];
+const DARK: [number, number, number] = [18, 18, 18];
 
 /** Boleta de venta A4 con logo, datos del emisor, QR de verificacion y firma. */
 export async function generateBoletaPDF(data: BoletaData): Promise<jsPDF> {
@@ -163,10 +162,10 @@ export async function generateBoletaPDF(data: BoletaData): Promise<jsPDF> {
   autoTable(doc, {
     startY: y0 + 32,
     margin: { left: M, right: M },
-    head: [["#", "Descripcion", "Serie", "Cant.", "P. Unit.", "Importe"]],
+    head: [["#", "Descripcion", "Codigo", "Cant.", "P. Unit.", "Importe"]],
     body: data.items.map((i, n) => [
       String(n + 1),
-      `${i.product_name}\nGarantia: ${i.warranty_months} meses`,
+      i.product_name,
       i.serial_number ?? "-",
       String(i.quantity),
       money(i.unit_price),
@@ -202,7 +201,7 @@ export async function generateBoletaPDF(data: BoletaData): Promise<jsPDF> {
   doc.setFont("helvetica", "normal");
   doc.setFontSize(7.5);
   doc.setTextColor(110);
-  doc.text("Escanea el codigo QR para verificar tu garantia y descargar tu boleta.", M + 3, afterTable + 26);
+  doc.text("Escanea el codigo QR para ver el estado de tu pedido y descargar tu boleta.", M + 3, afterTable + 26);
 
   const tx0 = W - M - 74;
   const row = (label: string, val: string, y: number, bold = false, size = 9) => {
@@ -249,8 +248,8 @@ export async function generateBoletaPDF(data: BoletaData): Promise<jsPDF> {
   doc.setFont("helvetica", "italic");
   doc.setFontSize(7.5);
   doc.setTextColor(120);
-  doc.text("Representacion impresa de la boleta de venta electronica. Conservela para hacer valida su garantia.", W / 2, H - 17, { align: "center" });
-  doc.text("Cambios y garantias sujetos a evaluacion tecnica. No se aceptan devoluciones de dinero.", W / 2, H - 13, { align: "center" });
+  doc.text("Representacion impresa de la boleta de venta electronica. Conservela para cualquier cambio o reclamo.", W / 2, H - 17, { align: "center" });
+  doc.text("Cambios de talla dentro de los 7 dias con la prenda sin uso y con etiqueta. No se aceptan devoluciones de dinero.", W / 2, H - 13, { align: "center" });
   doc.setFont("helvetica", "bold");
   doc.setTextColor(...BLUE);
   doc.text(`${BUSINESS.name} · RUC ${BUSINESS.ruc} · ${origin}${BUSINESS.portal}`, W / 2, H - 8, { align: "center" });

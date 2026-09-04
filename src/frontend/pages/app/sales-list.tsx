@@ -32,7 +32,7 @@ function SalesList() {
   const removeSale = async (s: S) => {
     if (!(await confirm({
       title: `¿Eliminar la venta ${s.sale_number}?`,
-      description: "Se borrarán sus productos y garantías asociadas.",
+      description: "Se borrarán sus productos y el registro del pedido.",
       confirmText: "Eliminar venta",
       destructive: true,
     }))) return;

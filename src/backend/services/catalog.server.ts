@@ -7,7 +7,8 @@ export type PublicProduct = {
   condition: string;
   sale_price: number;
   stock: number;
-  default_warranty_months: number;
+  size: string | null;
+  color: string | null;
   image_url: string | null;
 };
 
@@ -16,7 +17,7 @@ export async function fetchPublicCatalog(): Promise<PublicProduct[]> {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const { data } = await supabaseAdmin
     .from("products")
-    .select("id,name,brand,model,category,condition,sale_price,stock,default_warranty_months,image_url")
+    .select("id,name,brand,model,category,condition,sale_price,stock,size,color,image_url")
     .gt("stock", 0)
     .order("sale_price", { ascending: false })
     .limit(60);

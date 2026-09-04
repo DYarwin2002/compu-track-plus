@@ -17,7 +17,7 @@ import { useConfirm } from "@/frontend/components/confirm-dialog";
 type SaleFull = {
   id: string; sale_number: string; sale_date: string; subtotal: number; discount: number; igv: number; total: number;
   payment_method: string; notes: string | null; customers: { full_name: string; document: string; address: string | null; phone: string | null } | null;
-  sale_items: Array<{ id: string; product_name: string; serial_number: string | null; quantity: number; unit_price: number; line_total: number; warranty_months: number }>;
+  sale_items: Array<{ id: string; product_name: string; serial_number: string | null; quantity: number; unit_price: number; line_total: number }>;
 };
 
 function SaleDetail() {
@@ -53,7 +53,6 @@ function SaleDetail() {
       quantity: Number(i.quantity),
       unit_price: Number(i.unit_price),
       line_total: Number(i.line_total),
-      warranty_months: Number(i.warranty_months),
     })),
   });
 
@@ -94,7 +93,7 @@ function SaleDetail() {
               onClick={async () => {
                 if (!(await confirm({
                   title: `¿Eliminar la boleta ${sale.sale_number}?`,
-                  description: "Se borrarán sus productos y garantías.",
+                  description: "Se borrarán sus productos y el registro del pedido.",
                   confirmText: "Eliminar boleta",
                   destructive: true,
                 }))) return;
@@ -152,7 +151,7 @@ function BoletaA4({ sale }: { sale: SaleFull }) {
         <tbody>
           {sale.sale_items.map((i) => (
             <tr key={i.id} className="border-b border-border">
-              <td className="py-2">{i.product_name}<div className="text-xs text-muted-foreground">Garantía: {i.warranty_months} meses</div></td>
+              <td className="py-2">{i.product_name}</td>
               <td className="font-mono text-xs">{i.serial_number ?? "—"}</td>
               <td>{i.quantity}</td>
               <td>{formatSoles(i.unit_price)}</td>
@@ -167,7 +166,7 @@ function BoletaA4({ sale }: { sale: SaleFull }) {
         <div className="flex justify-between"><span className="text-muted-foreground">IGV (18%)</span><span>{formatSoles(sale.igv)}</span></div>
         <div className="flex justify-between border-t border-border pt-2 text-lg font-black"><span>TOTAL</span><span>{formatSoles(sale.total)}</span></div>
       </div>
-      <p className="mt-8 text-center text-xs text-muted-foreground">Gracias por su compra. Conserve esta boleta para hacer válida su garantía.</p>
+      <p className="mt-8 text-center text-xs text-muted-foreground">Gracias por tu compra. Conserva esta boleta para cambios de talla.</p>
     </Card>
   );
 }
@@ -178,7 +177,7 @@ function BoletaThermal({ sale }: { sale: SaleFull }) {
       <div className="text-center">
         <p className="text-base font-bold">{BUSINESS.name}</p>
         <p>RUC {BUSINESS.ruc}</p>
-        <p>Venta y reparación</p>
+        <p>Streetwear</p>
         <p>================================</p>
         <p className="font-bold">BOLETA {sale.sale_number}</p>
         <p>{formatDateTime(sale.sale_date)}</p>
@@ -192,7 +191,6 @@ function BoletaThermal({ sale }: { sale: SaleFull }) {
           <p>{i.product_name}</p>
           {i.serial_number && <p>  SN: {i.serial_number}</p>}
           <p>  {i.quantity} x {Number(i.unit_price).toFixed(2)} = {Number(i.line_total).toFixed(2)}</p>
-          <p>  Garantía: {i.warranty_months} meses</p>
         </div>
       ))}
       <p>--------------------------------</p>
