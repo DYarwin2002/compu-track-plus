@@ -2,7 +2,7 @@ import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import QRCode from "qrcode";
 import { BUSINESS } from "./business";
-import logoServi from "@/assets/logo-servicompu.jpg.asset.json";
+import logoServi from "@/assets/logo-sebas-urban.jpg.asset.json";
 
 export type BoletaData = {
   sale_number: string;
