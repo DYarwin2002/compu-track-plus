@@ -1,4 +1,4 @@
-import {Link } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -9,20 +9,17 @@ import { Input } from "@/frontend/components/ui/input";
 import { getPublicCatalog } from "@/backend/functions/public-catalog.functions";
 import { formatSoles } from "@/frontend/lib/format";
 import { LoginDialog } from "@/frontend/components/login-dialog";
-import heroTienda from "@/assets/hero-tienda.jpg";
-import logoServi from "@/assets/logo-servicompu.jpg.asset.json";
+import heroUrban from "@/assets/hero-urban.jpg";
+import logoUrban from "@/assets/logo-sebas-urban.jpg.asset.json";
 import { BUSINESS } from "@/frontend/lib/business";
 import { downloadCotizacionPDF } from "@/frontend/lib/cotizacion-pdf";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
 } from "@/frontend/components/ui/dialog";
 import {
-  Monitor, ShieldCheck, Zap, Search, Wrench, Truck, CreditCard, Cpu,
-  Sparkles, LayoutGrid, Phone, MapPin, Clock, MessageCircle, Package,
-  FileDown,
+  Shirt, Sparkles, Search, Truck, CreditCard, BadgeCheck, Package,
+  LayoutGrid, Phone, MapPin, Clock, MessageCircle, FileDown, RefreshCcw,
 } from "lucide-react";
-
-
 
 function Landing() {
   const { session } = useAuth();
@@ -37,16 +34,16 @@ function Landing() {
   const [selected, setSelected] = useState<(typeof products)[number] | null>(null);
   const [quote, setQuote] = useState<string[]>([]);
 
-  // La lista de cotización sobrevive a recargas del navegador.
+  // La lista de pedido sobrevive a recargas del navegador.
   useEffect(() => {
     try {
-      const raw = localStorage.getItem("sc-cotizacion");
+      const raw = localStorage.getItem("su-cotizacion");
       if (raw) setQuote(JSON.parse(raw));
     } catch { /* almacenamiento no disponible */ }
   }, []);
   useEffect(() => {
     try {
-      localStorage.setItem("sc-cotizacion", JSON.stringify(quote));
+      localStorage.setItem("su-cotizacion", JSON.stringify(quote));
     } catch { /* almacenamiento no disponible */ }
   }, [quote]);
 
@@ -69,8 +66,10 @@ function Landing() {
   const quoteTotal = quoteItems.reduce((s, p) => s + Number(p.sale_price), 0);
   const quoteMessage = () =>
     waLink(
-      `Hola ${BUSINESS.name}, quiero cotizar estos productos:\n` +
-        quoteItems.map((p, i) => `${i + 1}. ${p.name} — ${formatSoles(p.sale_price)}`).join("\n") +
+      `Hola ${BUSINESS.name}, quiero pedir estos productos:\n` +
+        quoteItems
+          .map((p, i) => `${i + 1}. ${p.name}${p.size ? ` (Talla ${p.size})` : ""} — ${formatSoles(p.sale_price)}`)
+          .join("\n") +
         `\n\nTotal referencial: ${formatSoles(quoteTotal)}`,
     );
 
@@ -79,7 +78,7 @@ function Landing() {
     return products.filter((p) => {
       if (cat !== "Todos" && p.category !== cat) return false;
       if (!term) return true;
-      return [p.name, p.brand, p.model, p.category].filter(Boolean).join(" ").toLowerCase().includes(term);
+      return [p.name, p.brand, p.model, p.category, p.size, p.color].filter(Boolean).join(" ").toLowerCase().includes(term);
     });
   }, [products, cat, q]);
 
@@ -90,11 +89,11 @@ function Landing() {
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
           <Link to="/" className="flex min-w-0 items-center gap-2">
             <img
-              src={logoServi.url}
-              alt="Logo ServiCompu Yarango"
-              className="h-10 w-10 shrink-0 rounded-xl bg-white object-contain p-0.5 shadow-sm"
+              src={logoUrban.url}
+              alt="Logo Sebas Urban"
+              className="h-10 w-10 shrink-0 rounded-full object-cover ring-1 ring-primary/40"
             />
-            <span className="truncate text-base font-black tracking-tight sm:text-lg">ServiCompu Yarango</span>
+            <span className="truncate text-base font-black uppercase tracking-[0.18em] sm:text-lg">Sebas Urban</span>
           </Link>
           <div className="flex items-center gap-2">
             <Button asChild size="sm" className="shadow" style={{ background: "var(--gradient-primary)" }}>
@@ -121,29 +120,29 @@ function Landing() {
       <section className="relative w-full overflow-hidden border-b border-border">
         <div className="relative aspect-[16/10] w-full sm:aspect-[21/9] lg:aspect-[24/7]">
           <img
-            src={heroTienda}
-            alt="Tienda ServiCompu Yarango: venta, reparación y garantía de computadoras"
+            src={heroUrban}
+            alt="Tienda Sebas Urban: zapatillas, hoodies y ropa urbana"
             width={1920}
-            height={848}
+            height={840}
             className="absolute inset-0 h-full w-full object-cover object-center"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-background/90 via-background/45 to-background/10" />
+          <div className="absolute inset-0 bg-gradient-to-r from-background/92 via-background/55 to-background/10" />
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/10 to-transparent" />
           <div className="absolute inset-0">
             <div className="mx-auto flex h-full max-w-6xl items-center px-4 sm:px-6">
               <div className="flex min-w-0 items-center gap-3 sm:gap-5">
                 <img
-                  src={logoServi.url}
+                  src={logoUrban.url}
                   alt=""
                   aria-hidden
-                  className="h-16 w-16 shrink-0 rounded-2xl bg-white object-contain p-1 shadow-lg sm:h-24 sm:w-24"
+                  className="h-16 w-16 shrink-0 rounded-full object-cover shadow-lg ring-2 ring-primary/50 sm:h-24 sm:w-24"
                 />
                 <div className="min-w-0">
-                  <p className="text-2xl font-black leading-tight tracking-tight sm:text-4xl lg:text-5xl">
-                    ServiCompu <span className="text-primary">Yarango</span>
+                  <p className="text-2xl font-black uppercase leading-tight tracking-[0.14em] sm:text-4xl lg:text-5xl">
+                    Sebas <span className="text-primary">Urban</span>
                   </p>
-                  <p className="mt-1 text-xs text-muted-foreground sm:text-base">
-                    Venta · Reparación · Garantía
+                  <p className="mt-1 text-xs uppercase tracking-[0.3em] text-muted-foreground sm:text-sm">
+                    Streetwear · Zapatillas · Estilo
                   </p>
                 </div>
               </div>
@@ -157,30 +156,30 @@ function Landing() {
         <div className="mx-auto grid max-w-6xl items-center gap-8 px-4 py-14 sm:px-6 lg:grid-cols-2 lg:py-20">
           <div>
             <span className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-3 py-1 text-xs text-muted-foreground">
-              <Sparkles className="h-3.5 w-3.5 text-primary" /> Tienda + servicio técnico en Santa Cruz
+              <Sparkles className="h-3.5 w-3.5 text-primary" /> Nueva temporada en Santa Cruz
             </span>
             <h1 className="mt-5 text-4xl font-black leading-[1.05] tracking-tight sm:text-5xl">
-              Laptops, PCs y componentes{" "}
+              Zapatillas y ropa urbana{" "}
               <span className="bg-clip-text text-transparent" style={{ backgroundImage: "var(--gradient-primary)" }}>
-                con garantía real
+                con estilo propio
               </span>
             </h1>
             <p className="mt-5 max-w-xl text-base text-muted-foreground sm:text-lg">
-              Equipos nuevos y seminuevos revisados, upgrades de RAM y SSD, mantenimiento y reparación.
-              Cada compra genera tu garantía digital que puedes consultar en línea cuando quieras.
+              Hoodies, polos, casacas, gorras y zapatillas seleccionadas. Elige tu talla, arma tu pedido
+              y sigue su estado en línea hasta que llegue a tus manos.
             </p>
             <div className="mt-7 flex flex-wrap gap-3">
               <Button asChild size="lg" style={{ background: "var(--gradient-primary)" }}>
                 <a href="#catalogo"><LayoutGrid className="mr-2 h-4 w-4" /> Ver catálogo</a>
               </Button>
               <Button asChild size="lg" variant="outline">
-                <Link to="/consultar"><ShieldCheck className="mr-2 h-4 w-4" /> Consultar mi garantía</Link>
+                <Link to="/consultar"><Package className="mr-2 h-4 w-4" /> Seguir mi pedido</Link>
               </Button>
             </div>
             <div className="mt-8 grid grid-cols-3 gap-3 text-center">
               {[
-                { k: "Garantía", v: "Hasta 24 meses" },
-                { k: "Soporte", v: "Técnico propio" },
+                { k: "Cambios", v: "Talla en 7 días" },
+                { k: "Delivery", v: "Local y provincia" },
                 { k: "Boletas", v: "Descarga en PDF" },
               ].map((s) => (
                 <div key={s.k} className="rounded-xl border border-border bg-background p-3">
@@ -195,18 +194,18 @@ function Landing() {
             <div className="rounded-3xl border border-border bg-background p-6 shadow-xl">
               <div className="flex items-center gap-3">
                 <div className="grid h-11 w-11 place-items-center rounded-xl text-primary-foreground" style={{ background: "var(--gradient-primary)" }}>
-                  <Zap className="h-5 w-5" />
+                  <Sparkles className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-sm font-black">Promoción del mes</p>
-                  <p className="text-xs text-muted-foreground">Válido hasta agotar stock</p>
+                  <p className="text-sm font-black">Drop del mes</p>
+                  <p className="text-xs text-muted-foreground">Hasta agotar stock</p>
                 </div>
               </div>
               <ul className="mt-5 space-y-3 text-sm">
                 {[
-                  { i: Cpu, t: "Upgrade SSD 480GB + instalación", d: "Deja tu equipo listo el mismo día" },
-                  { i: Wrench, t: "Mantenimiento preventivo", d: "Limpieza, pasta térmica y diagnóstico" },
-                  { i: ShieldCheck, t: "Garantía extendida", d: "Amplía la cobertura de tu equipo" },
+                  { i: Shirt, t: "2 polos oversize", d: "Precio especial llevando el combo" },
+                  { i: Package, t: "Zapatillas nuevas", d: "Tallas 35 a 44 disponibles" },
+                  { i: RefreshCcw, t: "Cambio de talla", d: "7 días con etiqueta y sin uso" },
                 ].map((p) => (
                   <li key={p.t} className="flex gap-3 rounded-xl border border-border bg-card/50 p-3">
                     <p.i className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
@@ -218,7 +217,7 @@ function Landing() {
                 ))}
               </ul>
               <Button asChild className="mt-5 w-full" variant="outline">
-                <Link to="/consultar">Ya soy cliente — ver mis garantías</Link>
+                <Link to="/consultar">Ya compré — ver mi pedido</Link>
               </Button>
             </div>
           </div>
@@ -228,10 +227,10 @@ function Landing() {
       {/* Beneficios */}
       <section className="mx-auto grid max-w-6xl grid-cols-2 gap-3 px-4 py-10 sm:px-6 lg:grid-cols-4">
         {[
-          { icon: ShieldCheck, t: "Garantía digital", d: "Consulta el estado por serie o DNI." },
-          { icon: Wrench, t: "Servicio técnico", d: "Órdenes con seguimiento en línea." },
+          { icon: BadgeCheck, t: "Prendas originales", d: "Calidad revisada pieza por pieza." },
+          { icon: RefreshCcw, t: "Cambio de talla", d: "7 días con etiqueta y sin uso." },
           { icon: CreditCard, t: "Pagos flexibles", d: "Efectivo, tarjeta, Yape y Plin." },
-          { icon: Truck, t: "Entrega rápida", d: "Delivery local coordinado." },
+          { icon: Truck, t: "Envíos rápidos", d: "Delivery local y a provincia." },
         ].map((f) => (
           <div key={f.t} className="rounded-2xl border border-border bg-card p-5">
             <f.icon className="h-6 w-6 text-primary" />
@@ -247,11 +246,11 @@ function Landing() {
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
               <h2 className="text-2xl font-black tracking-tight sm:text-3xl">Catálogo disponible</h2>
-              <p className="mt-1 text-sm text-muted-foreground">Productos con stock en tienda. Precios en soles, incluyen IGV.</p>
+              <p className="mt-1 text-sm text-muted-foreground">Prendas y zapatillas con stock en tienda. Precios en soles.</p>
             </div>
             <div className="relative w-full sm:w-72">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar producto o marca…" className="pl-9" />
+              <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar prenda, marca o talla…" className="pl-9" />
             </div>
           </div>
 
@@ -300,25 +299,23 @@ function Landing() {
                       />
                     ) : (
                       <div className="grid h-full w-full place-items-center text-muted-foreground">
-                        <Monitor className="h-10 w-10 opacity-40" />
+                        <Shirt className="h-10 w-10 opacity-40" />
                       </div>
                     )}
                   </div>
                   <div className="flex items-start justify-between gap-2">
                     <Badge variant="secondary" className="text-[10px] uppercase tracking-wide">{p.category}</Badge>
-                    <Badge variant={p.condition === "nuevo" ? "default" : "outline"} className="text-[10px] capitalize">
-                      {p.condition}
-                    </Badge>
+                    <Badge variant="outline" className="text-[10px] capitalize">{p.condition}</Badge>
                   </div>
                   <h3 className="mt-3 text-sm font-bold leading-snug">{p.name}</h3>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    {[p.brand, p.model].filter(Boolean).join(" · ") || "Equipo de tienda"}
+                    {[p.brand, p.model].filter(Boolean).join(" · ") || "Prenda de tienda"}
                   </p>
                   <div className="mt-4 flex items-end justify-between">
                     <div>
                       <p className="text-xl font-black text-primary">{formatSoles(p.sale_price)}</p>
                       <p className="text-[11px] text-muted-foreground">
-                        Garantía {p.default_warranty_months} meses
+                        {[p.size ? `Talla ${p.size}` : null, p.color].filter(Boolean).join(" · ") || "Talla única"}
                       </p>
                     </div>
                     <span className="rounded-full bg-muted px-2 py-1 text-[10px] font-semibold text-muted-foreground">
@@ -335,7 +332,7 @@ function Landing() {
                           : "border-border bg-background text-muted-foreground hover:text-foreground"
                       }`}
                     >
-                      {quote.includes(p.id) ? "En cotización" : "+ Cotizar"}
+                      {quote.includes(p.id) ? "En mi pedido" : "+ Agregar"}
                     </button>
                   </div>
                 </article>
@@ -345,13 +342,13 @@ function Landing() {
         </div>
       </section>
 
-      {/* Lista de cotización */}
+      {/* Lista de pedido */}
       {quoteItems.length > 0 && (
         <div className="sticky bottom-4 z-40 mx-auto w-[calc(100%-2rem)] max-w-3xl">
           <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-background/95 p-4 shadow-xl backdrop-blur">
             <div className="min-w-0">
               <p className="text-sm font-black">
-                {quoteItems.length} producto{quoteItems.length > 1 ? "s" : ""} en tu cotización
+                {quoteItems.length} producto{quoteItems.length > 1 ? "s" : ""} en tu pedido
               </p>
               <p className="truncate text-xs text-muted-foreground">
                 Total referencial {formatSoles(quoteTotal)} · {quoteItems.map((p) => p.name).join(", ")}
@@ -369,7 +366,7 @@ function Landing() {
               </Button>
               <Button asChild size="sm" className="font-bold" style={{ background: "var(--gradient-primary)" }}>
                 <a href={quoteMessage()} target="_blank" rel="noreferrer">
-                  <MessageCircle className="mr-2 h-4 w-4" /> Pedir cotización
+                  <MessageCircle className="mr-2 h-4 w-4" /> Pedir por WhatsApp
                 </a>
               </Button>
             </div>
@@ -393,7 +390,7 @@ function Landing() {
                   <img src={selected.image_url} alt={selected.name} className="h-full w-full object-cover" />
                 ) : (
                   <div className="grid h-full w-full place-items-center text-muted-foreground">
-                    <Package className="h-10 w-10 opacity-40" />
+                    <Shirt className="h-10 w-10 opacity-40" />
                   </div>
                 )}
               </div>
@@ -403,18 +400,18 @@ function Landing() {
                   <p className="mt-1 text-sm font-black text-primary">{formatSoles(selected.sale_price)}</p>
                 </div>
                 <div className="rounded-xl border border-border p-2">
-                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Garantía</p>
-                  <p className="mt-1 text-sm font-bold">{selected.default_warranty_months} meses</p>
+                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Talla</p>
+                  <p className="mt-1 text-sm font-bold">{selected.size || "Única"}</p>
                 </div>
                 <div className="rounded-xl border border-border p-2">
-                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Stock</p>
-                  <p className="mt-1 text-sm font-bold">{selected.stock}</p>
+                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Color</p>
+                  <p className="mt-1 text-sm font-bold">{selected.color || "—"}</p>
                 </div>
               </div>
               <Button asChild size="lg" className="w-full font-bold" style={{ background: "var(--gradient-primary)" }}>
                 <a
                   href={waLink(
-                    `Hola ${BUSINESS.name}, quiero consultar por: ${selected.name} (${formatSoles(selected.sale_price)}).`,
+                    `Hola ${BUSINESS.name}, quiero consultar por: ${selected.name}${selected.size ? ` (Talla ${selected.size})` : ""} (${formatSoles(selected.sale_price)}).`,
                   )}
                   target="_blank"
                   rel="noreferrer"
@@ -430,9 +427,9 @@ function Landing() {
       {/* CTA final */}
       <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
         <div className="rounded-3xl border border-border p-8 text-center sm:p-12" style={{ background: "var(--gradient-primary)" }}>
-          <h2 className="text-2xl font-black text-primary-foreground sm:text-3xl">¿Ya compraste con nosotros?</h2>
+          <h2 className="text-2xl font-black text-primary-foreground sm:text-3xl">¿Ya hiciste tu pedido?</h2>
           <p className="mx-auto mt-3 max-w-xl text-sm text-primary-foreground/85">
-            Revisa el estado de tu garantía, el avance de tu reparación y descarga tu boleta en PDF desde el portal de clientes.
+            Revisa el estado de tu pedido y descarga tu boleta en PDF desde el portal de clientes.
           </p>
           <Button asChild size="lg" variant="secondary" className="mt-6 font-bold">
             <Link to="/consultar"><Search className="mr-2 h-4 w-4" /> Entrar al portal de clientes</Link>
@@ -443,8 +440,8 @@ function Landing() {
       <footer className="border-t border-border">
         <div className="mx-auto grid max-w-6xl gap-6 px-4 py-10 text-sm sm:grid-cols-3 sm:px-6">
           <div>
-            <p className="font-black">ServiCompu Yarango</p>
-            <p className="mt-2 text-xs text-muted-foreground">Venta, mantenimiento y reparación de computadoras.</p>
+            <p className="font-black uppercase tracking-[0.18em]">Sebas Urban</p>
+            <p className="mt-2 text-xs text-muted-foreground">Zapatillas y ropa urbana para tu día a día.</p>
           </div>
           <div className="space-y-2 text-xs text-muted-foreground">
             <p className="flex items-center gap-2"><MapPin className="h-3.5 w-3.5 text-primary" /> {BUSINESS.address}</p>
