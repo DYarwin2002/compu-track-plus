@@ -116,73 +116,86 @@ function Landing() {
         </div>
       </header>
 
-      {/* Foto de portada */}
-      <section className="relative w-full overflow-hidden border-b border-border">
-        <div className="relative aspect-[16/10] w-full sm:aspect-[21/9] lg:aspect-[24/7]">
-          <img
-            src={heroUrban}
-            alt="Tienda Sebas Urban: zapatillas, hoodies y ropa urbana"
-            width={1920}
-            height={840}
-            className="absolute inset-0 h-full w-full object-cover object-center"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-background/92 via-background/55 to-background/10" />
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/10 to-transparent" />
-          <div className="absolute inset-0">
-            <div className="mx-auto flex h-full max-w-6xl items-center px-4 sm:px-6">
-              <div className="flex min-w-0 items-center gap-3 sm:gap-5">
-                <img
-                  src={logoUrban.url}
-                  alt=""
-                  aria-hidden
-                  className="h-16 w-16 shrink-0 rounded-full object-cover shadow-lg ring-2 ring-primary/50 sm:h-24 sm:w-24"
-                />
-                <div className="min-w-0">
-                  <p className="text-2xl font-black uppercase leading-tight tracking-[0.14em] sm:text-4xl lg:text-5xl">
-                    Sebas <span className="text-primary">Urban</span>
-                  </p>
-                  <p className="mt-1 text-xs uppercase tracking-[0.3em] text-muted-foreground sm:text-sm">
-                    Streetwear · Zapatillas · Estilo
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Hero premium — siempre oscuro con acento dorado */}
+      <section className="dark relative w-full overflow-hidden border-b border-border bg-background text-foreground">
+        <img
+          src={heroUrban}
+          alt="Tienda Sebas Urban: zapatillas, hoodies y ropa urbana"
+          width={1920}
+          height={1080}
+          className="absolute inset-0 h-full w-full scale-105 object-cover object-center opacity-45"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/85 to-background/20" />
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-background/40" />
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{ background: "radial-gradient(circle at 22% 30%, color-mix(in oklab, var(--primary) 14%, transparent) 0%, transparent 55%)" }}
+        />
+        {/* Texto decorativo vertical */}
+        <span
+          aria-hidden
+          className="font-display pointer-events-none absolute -right-4 top-8 hidden select-none text-[150px] font-black leading-none tracking-tighter text-foreground/5 xl:block"
+          style={{ writingMode: "vertical-rl" }}
+        >
+          URBAN
+        </span>
 
-      {/* Hero / publicidad */}
-      <section className="border-b border-border bg-card/40">
-        <div className="mx-auto grid max-w-6xl items-center gap-8 px-4 py-14 sm:px-6 lg:grid-cols-2 lg:py-20">
-          <div>
-            <span className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-3 py-1 text-xs text-muted-foreground">
-              <Sparkles className="h-3.5 w-3.5 text-primary" /> Nueva temporada en Santa Cruz
-            </span>
-            <h1 className="mt-5 text-4xl font-black leading-[1.05] tracking-tight sm:text-5xl">
-              Zapatillas y ropa urbana{" "}
-              <span className="bg-clip-text text-transparent" style={{ backgroundImage: "var(--gradient-primary)" }}>
-                con estilo propio
+        <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-4 py-16 sm:px-6 sm:py-20 lg:grid-cols-12 lg:py-28">
+          {/* Contenido */}
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 lg:col-span-7">
+            <div className="flex items-center gap-4">
+              <img
+                src={logoUrban.url}
+                alt="Logo Sebas Urban"
+                className="h-14 w-14 rounded-full border-2 border-primary/50 object-cover shadow-[0_0_20px_color-mix(in_oklab,var(--primary)_35%,transparent)] transition-transform duration-500 hover:scale-110"
+              />
+              <div className="h-px w-12 bg-border" />
+              <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-muted-foreground">
+                Streetwear · Santa Cruz, Perú
+              </span>
+            </div>
+
+            <h1 className="font-display mt-8 text-4xl font-black leading-[0.95] tracking-tighter sm:text-6xl lg:text-7xl">
+              ZAPATILLAS Y ROPA URBANA{" "}
+              <span
+                className="bg-clip-text text-transparent drop-shadow-[0_4px_15px_color-mix(in_oklab,var(--primary)_35%,transparent)]"
+                style={{ backgroundImage: "var(--gradient-primary)" }}
+              >
+                CON ESTILO PROPIO
               </span>
             </h1>
-            <p className="mt-5 max-w-xl text-base text-muted-foreground sm:text-lg">
+
+            <p className="mt-6 max-w-lg border-l-4 border-primary py-1 pl-5 text-base font-medium leading-relaxed text-muted-foreground sm:text-lg">
               Hoodies, polos, casacas, gorras y zapatillas seleccionadas. Elige tu talla, arma tu pedido
               y sigue su estado en línea hasta que llegue a tus manos.
             </p>
-            <div className="mt-7 flex flex-wrap gap-3">
-              <Button asChild size="lg" style={{ background: "var(--gradient-primary)" }}>
+
+            <div className="mt-8 flex flex-wrap gap-4">
+              <Button
+                asChild
+                size="lg"
+                className="px-8 font-black uppercase tracking-widest shadow-[0_15px_30px_-10px_color-mix(in_oklab,var(--primary)_50%,transparent)] transition-transform hover:-translate-y-1"
+                style={{ background: "var(--gradient-primary)" }}
+              >
                 <a href="#catalogo"><LayoutGrid className="mr-2 h-4 w-4" /> Ver catálogo</a>
               </Button>
-              <Button asChild size="lg" variant="outline">
+              <Button
+                asChild
+                size="lg"
+                variant="outline"
+                className="border-2 px-8 font-black uppercase tracking-widest"
+              >
                 <Link to="/consultar"><Package className="mr-2 h-4 w-4" /> Seguir mi pedido</Link>
               </Button>
             </div>
-            <div className="mt-8 grid grid-cols-3 gap-3 text-center">
+
+            <div className="mt-10 grid max-w-lg grid-cols-3 gap-3 text-center">
               {[
                 { k: "Cambios", v: "Talla en 7 días" },
                 { k: "Delivery", v: "Local y provincia" },
                 { k: "Boletas", v: "Descarga en PDF" },
               ].map((s) => (
-                <div key={s.k} className="rounded-xl border border-border bg-background p-3">
+                <div key={s.k} className="rounded-xl border border-border bg-card/60 p-3 backdrop-blur">
                   <p className="text-[10px] uppercase tracking-widest text-muted-foreground">{s.k}</p>
                   <p className="mt-1 text-sm font-bold">{s.v}</p>
                 </div>
@@ -190,38 +203,50 @@ function Landing() {
             </div>
           </div>
 
-          <div className="relative">
-            <div className="rounded-3xl border border-border bg-background p-6 shadow-xl">
-              <div className="flex items-center gap-3">
-                <div className="grid h-11 w-11 place-items-center rounded-xl text-primary-foreground" style={{ background: "var(--gradient-primary)" }}>
-                  <Sparkles className="h-5 w-5" />
+          {/* Tarjeta Drop del mes */}
+          <div className="animate-in fade-in slide-in-from-bottom-6 duration-700 lg:col-span-5">
+            <div className="relative">
+              <div className="absolute -inset-4 rounded-3xl bg-primary/15 blur-3xl" />
+              <div className="relative rounded-2xl border border-primary/30 bg-card/80 p-6 shadow-2xl backdrop-blur-md">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <span className="inline-block rounded bg-primary/15 px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.2em] text-primary">
+                      Drop del mes
+                    </span>
+                    <p className="font-display mt-2 text-xl font-extrabold leading-tight tracking-tight">
+                      Nueva temporada
+                    </p>
+                    <p className="mt-0.5 text-xs text-muted-foreground">Hasta agotar stock</p>
+                  </div>
+                  <span className="rounded bg-primary px-2 py-1 text-[10px] font-black uppercase text-primary-foreground shadow-lg">
+                    Limitado
+                  </span>
                 </div>
-                <div>
-                  <p className="text-sm font-black">Drop del mes</p>
-                  <p className="text-xs text-muted-foreground">Hasta agotar stock</p>
-                </div>
+                <ul className="mt-5 space-y-3 text-sm">
+                  {[
+                    { i: Shirt, t: "2 polos oversize", d: "Precio especial llevando el combo" },
+                    { i: Package, t: "Zapatillas nuevas", d: "Tallas 35 a 44 disponibles" },
+                    { i: RefreshCcw, t: "Cambio de talla", d: "7 días con etiqueta y sin uso" },
+                  ].map((p) => (
+                    <li key={p.t} className="flex gap-3 rounded-xl border border-border bg-background/60 p-3">
+                      <p.i className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                      <div>
+                        <p className="font-semibold">{p.t}</p>
+                        <p className="text-xs text-muted-foreground">{p.d}</p>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+                <Button asChild className="mt-5 w-full font-bold uppercase tracking-widest" variant="outline">
+                  <Link to="/consultar"><Sparkles className="mr-2 h-4 w-4" /> Ya compré — ver mi pedido</Link>
+                </Button>
               </div>
-              <ul className="mt-5 space-y-3 text-sm">
-                {[
-                  { i: Shirt, t: "2 polos oversize", d: "Precio especial llevando el combo" },
-                  { i: Package, t: "Zapatillas nuevas", d: "Tallas 35 a 44 disponibles" },
-                  { i: RefreshCcw, t: "Cambio de talla", d: "7 días con etiqueta y sin uso" },
-                ].map((p) => (
-                  <li key={p.t} className="flex gap-3 rounded-xl border border-border bg-card/50 p-3">
-                    <p.i className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                    <div>
-                      <p className="font-semibold">{p.t}</p>
-                      <p className="text-xs text-muted-foreground">{p.d}</p>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-              <Button asChild className="mt-5 w-full" variant="outline">
-                <Link to="/consultar">Ya compré — ver mi pedido</Link>
-              </Button>
             </div>
           </div>
         </div>
+
+        {/* Línea dorada inferior */}
+        <div className="absolute bottom-0 left-0 h-0.5 w-full" style={{ background: "var(--gradient-primary)" }} />
       </section>
 
       {/* Beneficios */}
