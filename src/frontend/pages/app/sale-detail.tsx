@@ -14,8 +14,10 @@ import { useConfirm } from "@/frontend/components/confirm-dialog";
 
 
 
+const ORDER_STATUSES = ["Pendiente", "En preparación", "Enviado", "Entregado", "Cancelado"] as const;
+
 type SaleFull = {
-  id: string; sale_number: string; sale_date: string; subtotal: number; discount: number; igv: number; total: number;
+  id: string; sale_number: string; sale_date: string; subtotal: number; discount: number; igv: number; total: number; order_status: string;
   payment_method: string; notes: string | null; customers: { full_name: string; document: string; address: string | null; phone: string | null } | null;
   sale_items: Array<{ id: string; product_name: string; serial_number: string | null; quantity: number; unit_price: number; line_total: number }>;
 };
