@@ -14,8 +14,10 @@ import { useConfirm } from "@/frontend/components/confirm-dialog";
 
 
 
+const ORDER_STATUSES = ["Pendiente", "En preparación", "Enviado", "Entregado", "Cancelado"] as const;
+
 type SaleFull = {
-  id: string; sale_number: string; sale_date: string; subtotal: number; discount: number; igv: number; total: number;
+  id: string; sale_number: string; sale_date: string; subtotal: number; discount: number; igv: number; total: number; order_status: string;
   payment_method: string; notes: string | null; customers: { full_name: string; document: string; address: string | null; phone: string | null } | null;
   sale_items: Array<{ id: string; product_name: string; serial_number: string | null; quantity: number; unit_price: number; line_total: number }>;
 };
@@ -59,7 +61,32 @@ function SaleDetail() {
   return (
     <div>
       <div className="no-print mb-4 flex flex-wrap items-center justify-between gap-2">
-        <Button asChild variant="ghost" size="sm"><Link to="/sales"><ArrowLeft className="mr-1 h-4 w-4" /> Volver</Link></Button>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button asChild variant="ghost" size="sm"><Link to="/sales"><ArrowLeft className="mr-1 h-4 w-4" /> Volver</Link></Button>
+          {isAdmin ? (
+            <label className="flex items-center gap-2 text-xs text-muted-foreground">
+              Estado del pedido
+              <select
+                value={sale.order_status}
+                onChange={async (e) => {
+                  const order_status = e.target.value;
+                  const prev = sale.order_status;
+                  setSale({ ...sale, order_status });
+                  const { error } = await supabase.from("sales").update({ order_status }).eq("id", sale.id);
+                  if (error) {
+                    setSale({ ...sale, order_status: prev });
+                    toast.error(error.message);
+                  } else toast.success(`Pedido marcado como “${order_status}”`);
+                }}
+                className="rounded-md border border-border bg-background px-2 py-1.5 text-xs font-semibold text-foreground"
+              >
+                {ORDER_STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
+              </select>
+            </label>
+          ) : (
+            <span className="rounded-full border border-border px-3 py-1 text-xs font-semibold">{sale.order_status}</span>
+          )}
+        </div>
         <div className="flex gap-2">
           <div className="flex overflow-hidden rounded-md border border-border">
             <button onClick={() => setFormat("a4")} className={`px-3 py-1.5 text-xs ${format === "a4" ? "bg-primary text-primary-foreground" : ""}`}>A4</button>
