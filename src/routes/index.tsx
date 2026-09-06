@@ -4,13 +4,15 @@ import Page from "@/frontend/pages/home";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "ServiCompu Yarango — Venta y reparación de computadoras" },
-      { name: "description", content: "Catálogo de laptops, PCs, componentes y accesorios con garantía. Servicio técnico especializado y portal de clientes para consultar garantías y boletas." },
-      { property: "og:title", content: "ServiCompu Yarango — Tienda y servicio técnico" },
-      { property: "og:description", content: "Equipos con garantía, precios claros y soporte técnico. Consulta tu garantía en línea." },
+      { title: "Sebas Urban — Zapatillas y ropa urbana en Santa Cruz" },
+      { name: "description", content: "Catálogo de zapatillas, hoodies, polos, casacas y gorras. Arma tu pedido por WhatsApp y sigue su estado desde el portal de clientes." },
+      { property: "og:title", content: "Sebas Urban — Streetwear y zapatillas" },
+      { property: "og:description", content: "Prendas originales, cambio de talla en 7 días y envíos a todo el país." },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://servicompuyarango.lovable.app/" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
+    links: [{ rel: "canonical", href: "https://servicompuyarango.lovable.app/" }],
   }),
   component: Page,
 });
