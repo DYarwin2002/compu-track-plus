@@ -7,11 +7,11 @@ import { Input } from "@/frontend/components/ui/input";
 import { Label } from "@/frontend/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/frontend/components/ui/card";
 import { toast } from "sonner";
-import { Monitor } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { logAudit } from "@/backend/functions/audit.functions";
 import { useAlert } from "@/frontend/components/alert-modal";
 import { authErrorMessage } from "@/frontend/lib/auth-errors";
+import logoSebas from "@/assets/logo-sebas-urban.jpg.asset.json";
 
 
 
@@ -47,10 +47,8 @@ function AuthPage() {
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
       <div className="w-full max-w-md">
         <Link to="/" className="mb-6 flex items-center justify-center gap-2">
-          <div className="grid h-10 w-10 place-items-center rounded-lg" style={{ background: "var(--gradient-primary)" }}>
-            <Monitor className="h-5 w-5 text-primary-foreground" />
-          </div>
-          <span className="text-xl font-bold">ServiCompu Yarango</span>
+          <img src={logoSebas.url} alt="Logo Sebas Urban" className="h-12 w-12 rounded-lg bg-black object-contain" />
+          <span className="text-xl font-bold">Sebas Urban</span>
         </Link>
         <Card>
           <CardHeader>
