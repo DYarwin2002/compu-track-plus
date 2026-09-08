@@ -10,9 +10,9 @@ import {
   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/frontend/components/ui/dialog";
 import { toast } from "sonner";
-import { Monitor } from "lucide-react";
 import { useAlert } from "@/frontend/components/alert-modal";
 import { authErrorMessage } from "@/frontend/lib/auth-errors";
+import logoSebas from "@/assets/logo-sebas-urban.jpg.asset.json";
 
 export function LoginDialog({ children }: { children: ReactNode }) {
   const nav = useNavigate();
@@ -47,11 +47,9 @@ export function LoginDialog({ children }: { children: ReactNode }) {
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="sm:max-w-sm">
         <DialogHeader>
-          <div className="mb-2 flex items-center gap-2">
-            <div className="grid h-9 w-9 place-items-center rounded-lg" style={{ background: "var(--gradient-primary)" }}>
-              <Monitor className="h-4.5 w-4.5 text-primary-foreground" />
-            </div>
-            <span className="text-sm font-black">ServiCompu Yarango</span>
+            <div className="mb-2 flex items-center gap-2">
+              <img src={logoSebas.url} alt="Logo Sebas Urban" className="h-10 w-10 rounded-lg bg-black object-contain" />
+              <span className="text-sm font-black">Sebas Urban</span>
           </div>
           <DialogTitle>Ingresar al sistema</DialogTitle>
           <DialogDescription>
