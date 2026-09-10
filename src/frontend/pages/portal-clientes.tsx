@@ -5,6 +5,7 @@ import {
   lookupSaleByNumber, getPublicSalePdfData, getPublicCustomerHistory,
   type PublicSaleSummary, type PublicCustomerHistory,
 } from "@/backend/functions/public-sales.functions";
+import { lookupWebOrder, type WebOrderView } from "@/backend/functions/web-orders.functions";
 import { downloadBoletaPDF } from "@/frontend/lib/boleta-pdf";
 import { Button } from "@/frontend/components/ui/button";
 import { Input } from "@/frontend/components/ui/input";
@@ -47,11 +48,13 @@ function Portal() {
           Consulta el estado de tu pedido y descarga tu boleta. Solo necesitas tu N° de boleta o tu DNI.
         </p>
 
-        <Tabs defaultValue="dni" className="mt-6">
-          <TabsList className="grid w-full grid-cols-2">
+        <Tabs defaultValue="pedido" className="mt-6">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="pedido">Pedido web</TabsTrigger>
             <TabsTrigger value="dni">Por DNI</TabsTrigger>
             <TabsTrigger value="boleta">Por N° de boleta</TabsTrigger>
           </TabsList>
+          <TabsContent value="pedido" className="pt-4"><WebOrderSearch /></TabsContent>
           <TabsContent value="dni" className="pt-4"><DniSearch /></TabsContent>
           <TabsContent value="boleta" className="pt-4"><BoletaSearch /></TabsContent>
         </Tabs>
@@ -221,6 +224,93 @@ function SaleCard({
         )}
       </CardContent>
     </Card>
+  );
+}
+
+const WEB_STEPS = ["Pendiente", "Confirmado", "En preparación", "Enviado", "Entregado"] as const;
+
+function WebOrderSearch() {
+  const runLookup = useServerFn(lookupWebOrder);
+  const [code, setCode] = useState("");
+  const [doc, setDoc] = useState("");
+  const [order, setOrder] = useState<WebOrderView | null>(null);
+  const [err, setErr] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  const search = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErr(null); setOrder(null); setBusy(true);
+    try {
+      const r = await runLookup({ data: { track_code: code.trim().toUpperCase(), document: doc.trim() } });
+      if (!r) setErr("No encontramos un pedido con ese código y DNI.");
+      setOrder(r);
+    } catch { setErr("No pudimos consultar el pedido. Revisa los datos."); }
+    finally { setBusy(false); }
+  };
+
+  const idx = order ? WEB_STEPS.indexOf(order.status as (typeof WEB_STEPS)[number]) : -1;
+
+  return (
+    <>
+      <p className="mb-3 text-sm text-muted-foreground">
+        Usa el código que te dimos al confirmar tu pedido desde el catálogo, junto con tu DNI.
+      </p>
+      <form onSubmit={search} className="grid gap-2 sm:grid-cols-[1fr_1fr_auto]">
+        <Input placeholder="Código del pedido" value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} />
+        <Input placeholder="Tu DNI" value={doc} onChange={(e) => setDoc(e.target.value)} />
+        <Button type="submit" disabled={busy || !code.trim() || !doc.trim()}><Search className="mr-2 h-4 w-4" /> Buscar</Button>
+      </form>
+      {err && <p className="mt-4 text-sm text-destructive">{err}</p>}
+      {order && (
+        <Card className="mt-6 overflow-hidden">
+          <div className={`flex items-center gap-2 px-4 py-2 text-sm font-bold ${statusMeta(order.status).tone}`}>
+            <Package className="h-4 w-4" /> {order.status}
+          </div>
+          <CardHeader className="flex flex-row items-start justify-between gap-3 space-y-0">
+            <div>
+              <CardTitle className="text-lg">{order.order_number}</CardTitle>
+              <p className="text-xs text-muted-foreground">{formatDate(order.created_at)} · Código {order.track_code}</p>
+            </div>
+            <div className="text-right">
+              <p className="text-xs text-muted-foreground">Total</p>
+              <p className="text-lg font-black">{formatSoles(order.total)}</p>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {order.status === "Cancelado" ? (
+              <p className="text-sm font-semibold text-destructive">Este pedido fue cancelado.</p>
+            ) : (
+              <div className="flex items-center gap-1">
+                {WEB_STEPS.map((s, i) => (
+                  <div key={s} className="flex-1">
+                    <div className={`h-1.5 rounded-full ${i <= idx ? "bg-primary" : "bg-muted"}`} />
+                    <p className={`mt-1 text-[10px] leading-tight ${i <= idx ? "font-bold text-foreground" : "text-muted-foreground"}`}>{s}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+            <ul className="space-y-1 text-sm">
+              {order.items.map((i, k) => (
+                <li key={k} className="flex items-center justify-between gap-2 border-b border-border/60 py-1 last:border-0">
+                  <span className="min-w-0 truncate">
+                    {i.quantity}× {i.product_name}
+                    {(i.size || i.color) && (
+                      <span className="ml-1 text-xs text-muted-foreground">
+                        ({[i.size ? `Talla ${i.size}` : null, i.color].filter(Boolean).join(" · ")})
+                      </span>
+                    )}
+                  </span>
+                  <span className="shrink-0 font-semibold">{formatSoles(i.line_total)}</span>
+                </li>
+              ))}
+            </ul>
+            <p className="text-xs text-muted-foreground">
+              La boleta se emite cuando la tienda confirma la entrega; podrás descargarla en la pestaña “Por DNI”.
+            </p>
+          </CardContent>
+        </Card>
+      )}
+    </>
   );
 }
 

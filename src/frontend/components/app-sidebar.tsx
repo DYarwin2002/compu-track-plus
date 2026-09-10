@@ -1,7 +1,7 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { LayoutDashboard, Package, Users, ShoppingCart, BarChart3, Search, LogOut, UserCog, ScrollText, Shield, Truck } from "lucide-react";
+import { LayoutDashboard, Package, Users, ShoppingCart, ShoppingBag, BarChart3, Search, LogOut, UserCog, ScrollText, Shield, Truck } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -27,6 +27,7 @@ const items: NavItem[] = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Nueva venta", url: "/sales/new", icon: ShoppingCart, permission: "sales.create" },
   { title: "Ventas", url: "/sales", icon: ShoppingCart, permission: "sales.view" },
+  { title: "Pedidos web", url: "/web-orders", icon: ShoppingBag },
   { title: "Productos", url: "/products", icon: Package, permission: "products.view" },
   { title: "Compras", url: "/purchases", icon: Truck, adminOnly: true },
   { title: "Clientes", url: "/customers", icon: Users, permission: "customers.view" },
