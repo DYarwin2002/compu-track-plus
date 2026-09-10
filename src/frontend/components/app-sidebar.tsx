@@ -1,7 +1,7 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { LayoutDashboard, Package, Users, ShoppingCart, BarChart3, Search, LogOut, UserCog, ScrollText, Shield, Truck } from "lucide-react";
+import { LayoutDashboard, Package, Users, ShoppingCart, ShoppingBag, BarChart3, Search, LogOut, UserCog, ScrollText, Shield, Truck } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
