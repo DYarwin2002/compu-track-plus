@@ -47,11 +47,13 @@ function Portal() {
           Consulta el estado de tu pedido y descarga tu boleta. Solo necesitas tu N° de boleta o tu DNI.
         </p>
 
-        <Tabs defaultValue="dni" className="mt-6">
-          <TabsList className="grid w-full grid-cols-2">
+        <Tabs defaultValue="pedido" className="mt-6">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="pedido">Pedido web</TabsTrigger>
             <TabsTrigger value="dni">Por DNI</TabsTrigger>
             <TabsTrigger value="boleta">Por N° de boleta</TabsTrigger>
           </TabsList>
+          <TabsContent value="pedido" className="pt-4"><WebOrderSearch /></TabsContent>
           <TabsContent value="dni" className="pt-4"><DniSearch /></TabsContent>
           <TabsContent value="boleta" className="pt-4"><BoletaSearch /></TabsContent>
         </Tabs>
