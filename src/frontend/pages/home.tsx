@@ -13,12 +13,18 @@ import heroUrban from "@/assets/hero-urban.jpg";
 import logoUrban from "@/assets/logo-sebas-urban.jpg.asset.json";
 import { BUSINESS } from "@/frontend/lib/business";
 import { downloadCotizacionPDF } from "@/frontend/lib/cotizacion-pdf";
+import { placeWebOrder, type WebOrderView } from "@/backend/functions/web-orders.functions";
+import { Label } from "@/frontend/components/ui/label";
+import { Textarea } from "@/frontend/components/ui/textarea";
+import { useAlert } from "@/frontend/components/alert-modal";
+import { toast } from "sonner";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
 } from "@/frontend/components/ui/dialog";
 import {
   Shirt, Sparkles, Search, Truck, CreditCard, BadgeCheck, Package,
   LayoutGrid, Phone, MapPin, Clock, MessageCircle, FileDown, RefreshCcw,
+  Minus, Plus, Copy, CheckCircle2,
 } from "lucide-react";
 
 function Landing() {
@@ -33,6 +39,9 @@ function Landing() {
   const [q, setQ] = useState("");
   const [selected, setSelected] = useState<(typeof products)[number] | null>(null);
   const [quote, setQuote] = useState<string[]>([]);
+  const [qty, setQty] = useState<Record<string, number>>({});
+  const [orderOpen, setOrderOpen] = useState(false);
+  const [confirmed, setConfirmed] = useState<WebOrderView | null>(null);
 
   // La lista de pedido sobrevive a recargas del navegador.
   useEffect(() => {
@@ -50,6 +59,10 @@ function Landing() {
   const toggleQuote = (id: string) =>
     setQuote((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
 
+  const qtyOf = (id: string) => qty[id] ?? 1;
+  const setQtyFor = (id: string, n: number) =>
+    setQty((prev) => ({ ...prev, [id]: Math.max(1, Math.min(20, n)) }));
+
   const waLink = (text: string) =>
     `https://wa.me/${BUSINESS.whatsapp}?text=${encodeURIComponent(text)}`;
 
@@ -63,12 +76,12 @@ function Landing() {
   }, [products]);
 
   const quoteItems = useMemo(() => products.filter((p) => quote.includes(p.id)), [products, quote]);
-  const quoteTotal = quoteItems.reduce((s, p) => s + Number(p.sale_price), 0);
+  const quoteTotal = quoteItems.reduce((s, p) => s + Number(p.sale_price) * qtyOf(p.id), 0);
   const quoteMessage = () =>
     waLink(
       `Hola ${BUSINESS.name}, quiero pedir estos productos:\n` +
         quoteItems
-          .map((p, i) => `${i + 1}. ${p.name}${p.size ? ` (Talla ${p.size})` : ""} — ${formatSoles(p.sale_price)}`)
+          .map((p, i) => `${i + 1}. ${qtyOf(p.id)}x ${p.name}${p.size ? ` (Talla ${p.size})` : ""} — ${formatSoles(Number(p.sale_price) * qtyOf(p.id))}`)
           .join("\n") +
         `\n\nTotal referencial: ${formatSoles(quoteTotal)}`,
     );
@@ -389,10 +402,18 @@ function Landing() {
               >
                 <FileDown className="mr-2 h-4 w-4" /> Descargar PDF
               </Button>
-              <Button asChild size="sm" className="font-bold" style={{ background: "var(--gradient-primary)" }}>
+              <Button asChild variant="outline" size="sm" className="font-bold">
                 <a href={quoteMessage()} target="_blank" rel="noreferrer">
-                  <MessageCircle className="mr-2 h-4 w-4" /> Pedir por WhatsApp
+                  <MessageCircle className="mr-2 h-4 w-4" /> WhatsApp
                 </a>
+              </Button>
+              <Button
+                size="sm"
+                className="font-bold"
+                style={{ background: "var(--gradient-primary)" }}
+                onClick={() => setOrderOpen(true)}
+              >
+                <Package className="mr-2 h-4 w-4" /> Hacer pedido
               </Button>
             </div>
           </div>
@@ -480,6 +501,21 @@ function Landing() {
         </div>
       </footer>
 
+      <OrderDialog
+        open={orderOpen}
+        onOpenChange={setOrderOpen}
+        items={quoteItems.map((p) => ({
+          id: p.id, name: p.name, size: p.size, color: p.color,
+          price: Number(p.sale_price), qty: qtyOf(p.id), stock: p.stock,
+        }))}
+        total={quoteTotal}
+        onQty={setQtyFor}
+        onRemove={(id) => setQuote((prev) => prev.filter((x) => x !== id))}
+        onDone={(order) => { setConfirmed(order); setQuote([]); setQty({}); setOrderOpen(false); }}
+      />
+
+      <ConfirmationDialog order={confirmed} onClose={() => setConfirmed(null)} />
+
       {/* WhatsApp flotante */}
       <a
         href={waLink(`Hola ${BUSINESS.name}, necesito información.`)}
@@ -492,6 +528,189 @@ function Landing() {
         <MessageCircle className="h-6 w-6" />
       </a>
     </div>
+  );
+}
+
+type OrderLine = {
+  id: string; name: string; size: string | null; color: string | null;
+  price: number; qty: number; stock: number;
+};
+
+function OrderDialog({
+  open, onOpenChange, items, total, onQty, onRemove, onDone,
+}: {
+  open: boolean;
+  onOpenChange: (o: boolean) => void;
+  items: OrderLine[];
+  total: number;
+  onQty: (id: string, n: number) => void;
+  onRemove: (id: string) => void;
+  onDone: (order: WebOrderView) => void;
+}) {
+  const submitOrder = useServerFn(placeWebOrder);
+  const { alert, alertModal } = useAlert();
+  const [form, setForm] = useState({ name: "", document: "", phone: "", address: "", notes: "" });
+  const [busy, setBusy] = useState(false);
+
+  const set = (k: keyof typeof form, v: string) => setForm((p) => ({ ...p, [k]: v }));
+
+  const send = async () => {
+    if (form.name.trim().length < 3) return alert({ title: "Falta tu nombre", description: "Escribe tu nombre y apellido completos." });
+    if (!/^\d{8,11}$/.test(form.document.trim())) return alert({ title: "DNI inválido", description: "Ingresa tu DNI (8 dígitos) o RUC." });
+    if (!/^\d{6,12}$/.test(form.phone.trim().replace(/\s/g, ""))) return alert({ title: "WhatsApp inválido", description: "Ingresa tu número de WhatsApp, solo números." });
+    if (form.address.trim().length < 5) return alert({ title: "Falta la dirección", description: "Indica a dónde debemos enviar tu pedido." });
+    if (items.length === 0) return alert({ title: "Pedido vacío", description: "Agrega al menos un producto." });
+
+    setBusy(true);
+    try {
+      const order = await submitOrder({
+        data: {
+          customer_name: form.name,
+          customer_document: form.document,
+          customer_phone: form.phone.replace(/\s/g, ""),
+          customer_address: form.address,
+          notes: form.notes || null,
+          items: items.map((i) => ({ product_id: i.id, quantity: i.qty })),
+        },
+      });
+      setForm({ name: "", document: "", phone: "", address: "", notes: "" });
+      onDone(order);
+    } catch {
+      alert({ title: "No pudimos registrar tu pedido", description: "Puede que un producto se haya agotado. Revisa tu lista o escríbenos por WhatsApp." });
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <>
+      {alertModal}
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-left text-lg font-black">Confirmar pedido</DialogTitle>
+            <DialogDescription className="text-left">
+              Revisa las cantidades y déjanos tus datos de entrega. Te daremos un código para seguir tu pedido.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-2">
+            {items.map((i) => (
+              <div key={i.id} className="flex items-center gap-3 rounded-xl border border-border p-3">
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-bold">{i.name}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {[i.size ? `Talla ${i.size}` : null, i.color].filter(Boolean).join(" · ") || "Talla única"} · {formatSoles(i.price)}
+                  </p>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Button type="button" variant="outline" size="icon" className="h-7 w-7" onClick={() => onQty(i.id, i.qty - 1)} aria-label="Quitar uno">
+                    <Minus className="h-3 w-3" />
+                  </Button>
+                  <span className="w-6 text-center text-sm font-bold">{i.qty}</span>
+                  <Button
+                    type="button" variant="outline" size="icon" className="h-7 w-7"
+                    disabled={i.qty >= i.stock}
+                    onClick={() => onQty(i.id, i.qty + 1)} aria-label="Agregar uno"
+                  >
+                    <Plus className="h-3 w-3" />
+                  </Button>
+                </div>
+                <button type="button" onClick={() => onRemove(i.id)} className="text-xs text-muted-foreground hover:text-destructive">
+                  Quitar
+                </button>
+              </div>
+            ))}
+            <div className="flex items-center justify-between rounded-xl bg-muted px-3 py-2">
+              <span className="text-sm font-semibold">Total</span>
+              <span className="text-lg font-black text-primary">{formatSoles(total)}</span>
+            </div>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="sm:col-span-2">
+              <Label htmlFor="wo-name">Nombre y apellido *</Label>
+              <Input id="wo-name" value={form.name} onChange={(e) => set("name", e.target.value)} placeholder="Ej. Ana Torres" />
+            </div>
+            <div>
+              <Label htmlFor="wo-doc">DNI *</Label>
+              <Input id="wo-doc" value={form.document} onChange={(e) => set("document", e.target.value)} placeholder="12345678" inputMode="numeric" />
+            </div>
+            <div>
+              <Label htmlFor="wo-phone">WhatsApp *</Label>
+              <Input id="wo-phone" value={form.phone} onChange={(e) => set("phone", e.target.value)} placeholder="987654321" inputMode="numeric" />
+            </div>
+            <div className="sm:col-span-2">
+              <Label htmlFor="wo-addr">Dirección de entrega *</Label>
+              <Input id="wo-addr" value={form.address} onChange={(e) => set("address", e.target.value)} placeholder="Calle, número, distrito" />
+            </div>
+            <div className="sm:col-span-2">
+              <Label htmlFor="wo-notes">Nota (opcional)</Label>
+              <Textarea id="wo-notes" rows={2} value={form.notes} onChange={(e) => set("notes", e.target.value)} placeholder="Referencias, horario de entrega…" />
+            </div>
+          </div>
+
+          <Button
+            size="lg" className="w-full font-black uppercase tracking-widest"
+            style={{ background: "var(--gradient-primary)" }}
+            disabled={busy}
+            onClick={send}
+          >
+            {busy ? "Enviando…" : "Confirmar pedido"}
+          </Button>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
+
+function ConfirmationDialog({ order, onClose }: { order: WebOrderView | null; onClose: () => void }) {
+  const waText = order
+    ? `Hola ${BUSINESS.name}, acabo de hacer el pedido ${order.order_number} (código ${order.track_code}) por ${formatSoles(order.total)}.`
+    : "";
+  return (
+    <Dialog open={!!order} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-w-md">
+        {order && (
+          <>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-left text-lg font-black">
+                <CheckCircle2 className="h-5 w-5 text-primary" /> ¡Pedido recibido!
+              </DialogTitle>
+              <DialogDescription className="text-left">
+                Guarda tu código: con él y tu DNI puedes seguir tu pedido en el portal.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="rounded-2xl border-2 border-primary/40 bg-card p-4 text-center">
+              <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Código de seguimiento</p>
+              <p className="mt-1 font-display text-3xl font-black tracking-widest text-primary">{order.track_code}</p>
+              <p className="mt-2 text-xs text-muted-foreground">Pedido {order.order_number} · {formatSoles(order.total)}</p>
+            </div>
+            <div className="grid gap-2 sm:grid-cols-2">
+              <Button
+                variant="outline"
+                onClick={async () => {
+                  try {
+                    await navigator.clipboard.writeText(order.track_code);
+                    toast.success("Código copiado");
+                  } catch { toast.error("Copia el código manualmente."); }
+                }}
+              >
+                <Copy className="mr-2 h-4 w-4" /> Copiar código
+              </Button>
+              <Button asChild variant="outline">
+                <Link to="/consultar">Ir al portal</Link>
+              </Button>
+            </div>
+            <Button asChild className="w-full font-bold" style={{ background: "var(--gradient-primary)" }}>
+              <a href={`https://wa.me/${BUSINESS.whatsapp}?text=${encodeURIComponent(waText)}`} target="_blank" rel="noreferrer">
+                <MessageCircle className="mr-2 h-4 w-4" /> Avisar por WhatsApp
+              </a>
+            </Button>
+          </>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 }
 
